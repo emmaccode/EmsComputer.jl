@@ -117,11 +117,11 @@ uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 
 [[deps.Toolips]]
 deps = ["Crayons", "Dates", "HTTP", "Pkg", "Sockets"]
-git-tree-sha1 = "9ae612e76b257c31b34144235d80df16ddfd491e"
-repo-rev = "main"
+git-tree-sha1 = "f102c6d0e9191445491283125c7a41990e52e1b6"
+repo-rev = "Unstable"
 repo-url = "https://github.com/ChifiSource/Toolips.jl.git"
 uuid = "a47e2ad8-fcf7-417c-9746-32b9bdf220bd"
-version = "0.0.5"
+version = "0.0.6"
 
 [[deps.URIs]]
 git-tree-sha1 = "97bbe755a53fe859669cd907f2d96aee8d2c1355"
