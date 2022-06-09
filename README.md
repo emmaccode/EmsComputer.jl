@@ -3,3 +3,6 @@
   </div>
   
   **http://ems.computer**
+#### What is Em's Computer?
+Em's Computer is a website dedicated to the content, journalism, information, software, and works created by Em Boudreau. The website is built using Toolips.jl and is available for visit or source viewing.
+#### More Info
