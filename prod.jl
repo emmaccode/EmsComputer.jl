@@ -1,5 +1,5 @@
 using Toolips
-IP = "127.0.0.1"
+IP = "ems.computer"
 PORT = 8000
 extensions = Dict(:logger => Logger(), :public => Files("public"))
 include("src/EmsComputer.jl")
