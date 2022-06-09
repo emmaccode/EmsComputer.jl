@@ -1,4 +1,5 @@
-IP = "96.126.111.221"
+using Toolips
+IP = "127.0.0.1"
 PORT = 8000
-PUBLIC = "../public"
-include("src/emmy.jl")
+extensions = Dict(:logger => Logger(), :public => Files("public"))
+include("src/EmsComputer.jl")
