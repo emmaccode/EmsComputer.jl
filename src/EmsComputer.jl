@@ -21,7 +21,7 @@ header["top-margin"] = "100px"
 ytbutton = imageinput("preview", src = "https://i.ibb.co/C8dcH0W/icons8-youtube-100.png",
 value = "youtube")
 ytbutton[:name] = "preview"
-linkbuttons = form("links", [ytbutton], get = "/")
+#linkbuttons = form("links", [ytbutton], get = "/")
 
 hello_world = route("/") do c
     for s in header_css
@@ -29,7 +29,7 @@ hello_world = route("/") do c
     end
     write!(c, header)
     write!(c, "<div align = \"center\">")
-    write!(c, linkbuttons)
+#    write!(c, linkbuttons)
     write!(c, "</br></br><h1>")
     for char in "welcome to em's computer.</br> This website is still being developed."
         write!(c, string(char))
