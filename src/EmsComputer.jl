@@ -6,8 +6,8 @@ end
 
 logo = img("logo", src = "https://i.ibb.co/NZhMDn8/animated.gif")
 lfade = Animation("fade_left")
-lfade[:from] = "opacity" => "%0"
-lfade[:to] = "opacity" => "%100"
+lfade[:from] = "opacity" => "0%"
+lfade[:to] = "opacity" => "100%"
 logo_style = Style("img")
 animate!(logo_style, lfade)
 style!(logo, logo_style)
