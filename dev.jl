@@ -3,9 +3,10 @@ using Pkg
 Pkg.activate(".")
 
 using Toolips
+using ToolipsSession
 IP = "127.0.0.1"
 PORT = 8000
-extensions = Dict(:logger => Logger(), :public => Files("public"))
+extensions = [Logger(), Files("public"), Session()]
 using Revise
 
 using EmsComputer

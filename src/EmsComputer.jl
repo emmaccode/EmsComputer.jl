@@ -1,5 +1,6 @@
 module EmsComputer
 using Toolips
+using ToolipsSession
 
 include("Styles.jl")
 include("Pages.jl")
@@ -22,23 +23,21 @@ server = EmsComputer.start(ip, port, [r])
 ```
 """
 function start(IP::String, PORT::Integer, routes::Vector{Route};
-    extensions::Dict = Dict(:logger => Logger(), :public => Files("public")))
+    extensions::Vector = [])
     server = ServerTemplate(IP, PORT, routes, extensions = extensions)
     server.start()
 end
 
 function make_routes()
     fourofour = route("404") do c
-        header = make_header()
-        write!(c, heading1_style)
-        write!(c, heading2_style)
+        header = make_header("/images/animated.gif")
+        write!(c, text_styles())
         write!(c, header)
         errormessage = h("4041", 1, text = "404")
         second = h("4042", 2, text = "It looks like something went wrong.")
-        style!(errormessage, heading1_style)
-        style!(second, heading2_style)
-        write!(c, errormessage)
-        write!(c, second)
+        style!(errormessage, text_styles()[1])
+        style!(second, text_styles()[2])
+        write!(c, components(errormessage, second))
     end
     homepage = route("/", home)
     routes(homepage, fourofour)
