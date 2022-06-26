@@ -9,7 +9,7 @@ end
 
 
 function home(c::Connection)
-    write!(c, title("thetitle", text = "em's computer!"))
+    write!(c, title("thetitle", text = "em's computer !"))
     header = make_header()
 
     #==
@@ -66,24 +66,48 @@ function home(c::Connection)
             cm[main] = "dark" => "no"
         end
     end
+    button_group = divider("buttongrp", align = "center")
+    push!(button_group, sponsorbttn, githubbttn, ytbttn, medbttn, lightbttn)
     #==
-    /Header links
+    Navigation buttons
     ==#
+    postsbutton = button("postbutton", text = "my posts")
     repobutton = button("repobutton", text = "repository overview")
-    style!(repobutton, "color" => "white", "border-style" => "none",
-    "background-color" => "#107896", "border-radius" => "10px")
+    contactbutton = button("contactbttn", text = "contact me")
+    projects = button("projbttn", text = "project portfolio")
+    collaborate = button("collbttn", text = "collaborate !")
+    for comp in components(repobutton, contactbutton, postsbutton,
+        collaborate, projects)
+        style!(comp, "color" => "white", "border-style" => "none",
+        "background-color" => "#107896", "border-radius" => "10px")
+        on(c, comp, "mouseover") do cm::ComponentModifier
+            style!(cm, comp, "background-color" => "lightblue")
+        end
+        on(c, comp, "mouseleave") do cm::ComponentModifier
+            style!(cm, comp, "background-color" => "#107896")
+        end
+    end
     on(c, repobutton, "click") do cm::ComponentModifier
         cm["logo"] = "src" => "/images/animated.gif"
+        for but in linkbuttons
+            animate!(cm, but, anim_logoout())
+        end
+        animate!(cm, "logo", anim_logoout())
     end
-    on(c, repobutton, "mouseover") do cm::ComponentModifier
-        style!(cm, repobutton, "background-color" => "lightblue")
-    end
-    on(c, repobutton, "mouseleave") do cm::ComponentModifier
-        style!(cm, repobutton, "background-color" => "#107896")
-    end
-     button_group = divider("buttongrp", align = "center")
-     push!(button_group, sponsorbttn, githubbttn, ytbttn, medbttn, lightbttn)
-     push!(main, repobutton)
+    navdiv = divider("navdiv", align = "center")
+    push!(navdiv, postsbutton, repobutton, projects, collaborate, contactbutton)
+    push!(main, navdiv)
+    #==
+    Home !
+    ==#
+    home_div = divider("homediv", align = "center")
+    greeting = h("greeting", align = "center",
+    text = "hi, welcome to em's computer!")
+    push!(home_div, greeting)
+    push!(main, home_div)
+    #==
+    Writes
+    ==#
     write!(c, stylesheet())
     write!(c, header)
     write!(c, button_group)
