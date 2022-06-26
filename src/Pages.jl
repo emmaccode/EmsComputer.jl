@@ -17,14 +17,17 @@ end
 function home(c::Connection)
     write!(c, title("thetitle", text = "em's computer !"))
     header = make_header(c)
-
+    body = Component("mainbody", "body")
+    style!(body, "background-color" => "#D6CBDA")
     #==
     Header links
     ==#
     main = divider("maindiv")
     main["dark"] = "no"
+    main["bselected"] = "postbutton"
     style!(main, "background-color" => "#03DAC6", "margin-top" => "50px",
-    "border-radius" => "20px", "padding" => "10px")
+    "border-radius" => "20px", "padding" => "10px", "margin-left" => "200px",
+    "margin-right" => "200px")
     sponsorbttn = img("sponsorbutton", src = "images/icons/sponsoricon.png",
     width = 64, height = 64)
     githubbttn = img("ghbutton", src = "images/icons/ghicon.png",
@@ -34,7 +37,14 @@ function home(c::Connection)
     medbttn = img("medbutton", src = "images/icons/medic.png",
     width = 64, height = 64)
     lightbttn = img("lightbutton", src = "images/icons/swicol.png")
-    linkbuttons = components(sponsorbttn, githubbttn, ytbttn, medbttn, lightbttn)
+    twittbutton = img("twittbutton", src = "images/icons/twittico.png",
+    width = 64, height = 64)
+    twittbutton = img("twittbutton", src = "images/icons/twittico.png",
+    width = 64, height = 64)
+    linbutton = img("linbutton", src = "images/icons/linkinicon.png",
+    width = 64, height = 64)
+    linkbuttons = components(sponsorbttn, githubbttn, ytbttn, medbttn,
+    twittbutton, linbutton, lightbttn)
     for thisbutton in linkbuttons
         on(c, thisbutton, "mouseover") do cm::ComponentModifier
             cm[thisbutton] = "width" => 75
@@ -47,7 +57,7 @@ function home(c::Connection)
     end
     on(c, sponsorbttn, "click") do cm::ComponentModifier
         redirect!(cm, "https://github.com/sponsors/emmettgb")
-        alert!(cm, "redirecting to my sponsors profile (thanks!)")
+        alert!(cm, "redirecting to my sponsors profile (thanks !)")
     end
     on(c, medbttn, "click") do cm::ComponentModifier
         redirect!(cm, "https://medium.com/@emmettgb")
@@ -55,25 +65,36 @@ function home(c::Connection)
     end
     on(c, ytbttn, "click") do cm::ComponentModifier
         redirect!(cm, "https://www.youtube.com/channel/UCruzXIngBV2dlgjX1_HZRzw")
-        alert!(cm, "redirecting to my youtube channel!")
+        alert!(cm, "redirecting to my youtube channel !")
     end
     on(c, githubbttn, "click") do cm::ComponentModifier
         redirect!(cm, "https://github.com/emmettgb")
-        alert!(cm, "redirecting to my github!")
+        alert!(cm, "redirecting to my github !")
+    end
+    on(c, twittbutton, "click") do cm::ComponentModifier
+        redirect!(cm, "https://twitter.com/emmettboudgie")
+        alert!(cm, "redirecting to em on twitter")
+    end
+    on(c, linbutton, "click") do cm::ComponentModifier
+        redirect!(cm, "https://www.linkedin.com/in/emmett-boudreau-828b2818a/")
+        alert!(cm, "redirecting to my linkedin !")
     end
     on(c, lightbttn, "click") do cm::ComponentModifier
         if cm[main]["dark"] != "yes"
             cm[lightbttn] = "src" => "/images/icons/swicold.png"
             style!(cm, main, "background-color" => "#3700B3")
+            style!(cm, body, "background-color" => "#36454F")
             cm[main] = "dark" => "yes"
         else
             cm[lightbttn] = "src" => "/images/icons/swicol.png"
             style!(cm, main, "background-color" => "#03DAC6")
+            style!(cm, body, "background-color" => "#D6CBDA")
             cm[main] = "dark" => "no"
         end
     end
     button_group = divider("buttongrp", align = "center")
-    push!(button_group, sponsorbttn, githubbttn, ytbttn, medbttn, lightbttn)
+    button_group[:children] = linkbuttons
+    push!(header, button_group)
     #==
     Navigation buttons
     ==#
@@ -87,17 +108,29 @@ function home(c::Connection)
         style!(comp, "color" => "white", "border-style" => "none",
         "background-color" => "#107896", "border-radius" => "10px")
         on(c, comp, "mouseover") do cm::ComponentModifier
-            style!(cm, comp, "background-color" => "lightblue")
+            if cm[main]["bselected"] == comp.name
+                style!(cm, comp, "background-color" => "orange")
+            else
+                style!(cm, comp, "background-color" => "lightblue")
+            end
         end
         on(c, comp, "mouseleave") do cm::ComponentModifier
-            style!(cm, comp, "background-color" => "#107896")
+            if cm[main]["bselected"] == comp.name
+                style!(cm, comp, "background-color" => "purple")
+            else
+                style!(cm, comp, "background-color" => "#107896")
+            end
         end
     end
+    style!(postsbutton, "color" => "white", "border-style" => "none",
+    "background-color" => "purple", "border-radius" => "10px")
     on(c, repobutton, "click") do cm::ComponentModifier
         cm["logo"] = "src" => "/images/animated.gif"
         cm["logo"] = "out" => "true"
+        cm[main] = "bselected" => repobutton.name
         for but in linkbuttons
             animate!(cm, but, anim_logoout())
+            style!(cm, but, "opacity" => "0%")
         end
         animate!(cm, "logo", anim_logoout())
     end
@@ -113,16 +146,9 @@ function home(c::Connection)
     push!(home_div, greeting)
     push!(main, home_div)
     #==
-    Audio test
-    ==#
-    audioc = Component("myaud","audio controls")
-    audioc["src"] = "media/testaudio.ogg"
-    push!(main, audioc)
-    #==
     Writes
     ==#
+    push!(body, header, main)
     write!(c, stylesheet())
-    write!(c, header)
-    write!(c, button_group)
-    write!(c, main)
+    write!(c, body)
 end
