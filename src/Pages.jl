@@ -1,8 +1,14 @@
-function make_header(uri::String = "/images/animated.gif")
+function make_header(c::Connection, uri::String = "/images/animated.gif")
     header = divider("header", align = "center", float = "left")
     header["top-margin"] = "100px"
     logo = img("logo", src = uri)
     logo[:class] = "logo"
+    logo["out"] = "false"
+    on(c, logo, "animationend") do cm::ComponentModifier
+        if cm[logo]["out"] == "true"
+            remove!(cm, logo)
+        end
+    end
     push!(header, logo)
     header
 end
@@ -10,7 +16,7 @@ end
 
 function home(c::Connection)
     write!(c, title("thetitle", text = "em's computer !"))
-    header = make_header()
+    header = make_header(c)
 
     #==
     Header links
@@ -89,6 +95,7 @@ function home(c::Connection)
     end
     on(c, repobutton, "click") do cm::ComponentModifier
         cm["logo"] = "src" => "/images/animated.gif"
+        cm["logo"] = "out" => "true"
         for but in linkbuttons
             animate!(cm, but, anim_logoout())
         end
@@ -105,6 +112,12 @@ function home(c::Connection)
     text = "hi, welcome to em's computer!")
     push!(home_div, greeting)
     push!(main, home_div)
+    #==
+    Audio test
+    ==#
+    audioc = Component("myaud","audio controls")
+    audioc["src"] = "media/testaudio.ogg"
+    push!(main, audioc)
     #==
     Writes
     ==#
