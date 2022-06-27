@@ -33,6 +33,10 @@ mutable struct RepoData
     end
 end
 
+repodata = get("https://api.github.com/users/emmettgb/repos")
+repositories = JSON.parse(repodata)
+rds = [RepoData(d) for d in repositories]
+
 function home(c::Connection)
     write!(c, title("thetitle", text = "em's computer !"))
     header = make_header(c)
@@ -131,10 +135,6 @@ function home(c::Connection)
     Repo
     ==#
     repodiv = divider("repodiv")
-    #==
-    repodata = get("https://api.github.com/users/emmettgb/repos?key=$GHKEY")
-    repositories = JSON.parse(repodata)
-    rds = [RepoData(d) for d in repositories]
     for rd in rds
         currdiv = divider("div$(rd.name)")
         headit = h(1, "name$(rd.name)", text = rd.name)
@@ -145,7 +145,6 @@ function home(c::Connection)
         push!(currdiv, headit, desc)
         push!(repodiv, currdiv)
     end
-    ==#
     #==
     Navigation buttons
     ==#
@@ -186,9 +185,7 @@ function home(c::Connection)
         style!(cm, "logo", "opacity" => "0%")
         animate!(cm, "logo", anim_logoout())
         animate!(cm, main, move_mainup())
-        set_children!(cm, main, components(h("temp", 1,
-         text = "This section doesn't exist yet :("),
-          h("temp2", 2, text = "sorry!")))
+        set_children!(cm, main, components(repodiv))
     end
     navdiv = divider("navdiv", align = "center")
     push!(navdiv, postsbutton, repobutton, projects, collaborate, contactbutton)
