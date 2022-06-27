@@ -17,6 +17,13 @@ function anim_logoin()
     lfade
 end
 
+function move_mainup()
+    animat = Animation("maingoup", length = 2.845)
+    animat[:from] = "transform" => "translateY(0%)"
+    animat[:to] = "transform" => "translateY(-120%)"
+    animat
+end
+
 function anim_logoout()
     lfade = Animation("lfadeout", length = 2.8)
     lfade[:to] = "opacity" => "0%"
@@ -42,6 +49,7 @@ function button_style()
 end
 
 function stylesheet()
-    vcat(components(logo_sty(), button_style(), anim_logoin(), anim_logoout()),
+    vcat(components(logo_sty(), button_style(), anim_logoin(), anim_logoout(),
+    move_mainup()),
     text_styles())
 end

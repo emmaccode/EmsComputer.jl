@@ -6,6 +6,7 @@ function make_header(c::Connection, uri::String = "/images/animated.gif")
     logo["out"] = "false"
     on(c, logo, "animationend") do cm::ComponentModifier
         if cm[logo]["out"] == "true"
+            style!(cm, "logo", "opacity" => "0%")
             remove!(cm, logo)
         end
     end
@@ -13,6 +14,24 @@ function make_header(c::Connection, uri::String = "/images/animated.gif")
     header
 end
 
+function string_to_array(s::String)
+    s = replace(s, "[" => "")
+    s = replace(s, "]" => "")
+    split(s, ",")
+end
+
+mutable struct RepoData
+    name::Any
+    desc::Any
+    url::Any
+    language::Any
+    stars::Any
+    function RepoData(d::Dict)
+        tag_url = d["tags_url"]
+        new(d["name"], d["description"], d["html_url"], d["language"],
+            d["stargazers_count"])
+    end
+end
 
 function home(c::Connection)
     write!(c, title("thetitle", text = "em's computer !"))
@@ -25,9 +44,11 @@ function home(c::Connection)
     main = divider("maindiv")
     main["dark"] = "no"
     main["bselected"] = "postbutton"
+    footer = divider("footerdiv")
+    style!(footer, "background-color" => "gray")
     style!(main, "background-color" => "#03DAC6", "margin-top" => "50px",
     "border-radius" => "20px", "padding" => "10px", "margin-left" => "200px",
-    "margin-right" => "200px")
+    "margin-right" => "200px", "position" => "relative")
     sponsorbttn = img("sponsorbutton", src = "images/icons/sponsoricon.png",
     width = 64, height = 64)
     githubbttn = img("ghbutton", src = "images/icons/ghicon.png",
@@ -53,6 +74,9 @@ function home(c::Connection)
         on(c, thisbutton, "mouseleave") do cm::ComponentModifier
             cm[thisbutton] = "width" => 64
             cm[thisbutton] = "height" => 64
+        end
+        on(c, thisbutton, "animationend") do cm::ComponentModifier
+            remove!(cm, thisbutton)
         end
     end
     on(c, sponsorbttn, "click") do cm::ComponentModifier
@@ -96,6 +120,33 @@ function home(c::Connection)
     button_group[:children] = linkbuttons
     push!(header, button_group)
     #==
+    Home !
+    ==#
+    home_div = divider("homediv", align = "center")
+    greeting = h("greeting", align = "center",
+    text = "hi, welcome to em's computer!")
+    push!(home_div, greeting)
+    push!(main, home_div)
+    #==
+    Repo
+    ==#
+    repodiv = divider("repodiv")
+    #==
+    repodata = get("https://api.github.com/users/emmettgb/repos?key=$GHKEY")
+    repositories = JSON.parse(repodata)
+    rds = [RepoData(d) for d in repositories]
+    for rd in rds
+        currdiv = divider("div$(rd.name)")
+        headit = h(1, "name$(rd.name)", text = rd.name)
+        desc = p("desc$(rd.name)")
+        on(c, currdiv, "click") do cm::ComponentModifier
+            redirect!(cm, rd.url)
+        end
+        push!(currdiv, headit, desc)
+        push!(repodiv, currdiv)
+    end
+    ==#
+    #==
     Navigation buttons
     ==#
     postsbutton = button("postbutton", text = "my posts")
@@ -132,23 +183,20 @@ function home(c::Connection)
             animate!(cm, but, anim_logoout())
             style!(cm, but, "opacity" => "0%")
         end
+        style!(cm, "logo", "opacity" => "0%")
         animate!(cm, "logo", anim_logoout())
+        animate!(cm, main, move_mainup())
+        set_children!(cm, main, components(h("temp", 1,
+         text = "This section doesn't exist yet :("),
+          h("temp2", 2, text = "sorry!")))
     end
     navdiv = divider("navdiv", align = "center")
     push!(navdiv, postsbutton, repobutton, projects, collaborate, contactbutton)
     push!(main, navdiv)
     #==
-    Home !
-    ==#
-    home_div = divider("homediv", align = "center")
-    greeting = h("greeting", align = "center",
-    text = "hi, welcome to em's computer!")
-    push!(home_div, greeting)
-    push!(main, home_div)
-    #==
     Writes
     ==#
-    push!(body, header, main)
+    push!(body, header, main, footer)
     write!(c, stylesheet())
     write!(c, body)
 end
