@@ -1,7 +1,7 @@
 module EmsComputer
 using Toolips
 using ToolipsSession
-
+using JSON
 include("Styles.jl")
 include("Pages.jl")
 """

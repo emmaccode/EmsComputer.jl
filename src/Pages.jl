@@ -137,7 +137,7 @@ function home(c::Connection)
     repodiv = divider("repodiv")
     for rd in rds
         currdiv = divider("div$(rd.name)")
-        headit = h(1, "name$(rd.name)", text = rd.name)
+        headit = h("name$(rd.name)", 1, text = rd.name)
         desc = p("desc$(rd.name)")
         on(c, currdiv, "click") do cm::ComponentModifier
             redirect!(cm, rd.url)
