@@ -3,6 +3,7 @@ Pkg.update()
 using Toolips
 using ToolipsSession
 using EmsComputer
+using JSON
 IP = "127.0.0.1"
 PORT = 8000
 extensions = [Logger(), Files("public"), Session()]
