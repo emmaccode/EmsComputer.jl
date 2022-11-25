@@ -44,8 +44,8 @@ function home(c::Connection)
     push!(main, loginstuff)
     emsfooter = div("emsfooter")
     style!(emsfooter, "background" => "transparent", "position" => "absolute",
-    "margin-left" => 40percent, "margin-top" => 17percent)
-    push!(emsfooter, p("hethet", text = "hello"))
+    "margin-left" => 40percent, "margin-top" => 18percent)
+    push!(emsfooter, button("sourcelink", text = "source", href = "https://github.com/emmettgb/EmsComputer.jl"))
     on(c, "load") do cm::ComponentModifier
         style!(cm, logobg, "opacity" => 100percent, "transform" => "translateX(0%)")
         next!(c, logobg, cm) do cm::ComponentModifier
