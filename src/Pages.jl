@@ -18,13 +18,13 @@ function home(c::Connection)
     loginstuff = div("loginstuff", align = "left")
     style!(loginstuff, "background" => "transparent")
     unamebox = ToolipsDefaults.textdiv("unamebox", text = "username")
+    style!(unamebox, "color" => "white", "background-color" => "#888C8D", "font-size" => 14pt)
     on(c, unamebox, "click") do cm::ComponentModifier
         if cm[unamebox]["text"] == "username"
             set_text!(cm, unamebox, "")
         end
     end
     pwdbox = ToolipsDefaults.textdiv("pwdbox", text = "")
-    style!(unamebox, "color" => "white", "background-color" => "#888C8D", "font-size" => 14pt)
     mainpwdbox = div("mainpwdbox")
     style!(pwdbox, "color" => "white", "background-color" => "#888C8D", "font-size" => 14pt,
     "color" => "#888C8D")
@@ -56,23 +56,41 @@ function home(c::Connection)
     style!(pwdlabel, "color" => "lightpink")
     on(c, skipbutton, "click") do cm::ComponentModifier
         style!(cm, main, "height" => 0percent, "opacity" => "0percent")
-        style!(cm, body, "background-color" => "#36454F", "transition" => "2s")
+        style!(cm, body, "background-color" => "#36454F", "transition" => "2.5s")
         style!(cm, emsfooter, "opacity" => 0percent)
+        psh = Post("public/content/ems_computer.md")
+        app_panel = section("emsapps")
+        style!(app_panel, "background-color" => "#320064", "border-color" => "#141414")
+        push!(app_panel, h("apptitle", 2, text = psh.title))
+        next!(c, main, cm) do cm2::ComponentModifier
+            sleep(1)
+            set_children!(cm2, main, [app_panel])
+            cm2[header] = "src" => uri
+            style!(cm2, main, "background" => "transparent", "height" => 40percent,
+            "width" => 50percent, "opacity" => 100percent, "margin-left" => 25percent,
+            "margin-top" => 15px)
+            style!(cm2, header, "transform" => "scale(.7)", "transition" => 2seconds,
+            "margin-top" => 5px)
+            next!(c, main, cm2) do cm3::ComponentModifier
+
+
+            end
+        end
     end
     push!(loginstuff, loginheading, unamelabel, unamebox, br(), pwdlabel, mainpwdbox,
     signupbutton, skipbutton, loginbutton)
     push!(main, loginstuff)
-    emsfooter = div("emsfooter")
+    emsfooter = div("emsfooter", align = "center")
     style!(emsfooter, "background" => "transparent",
-    "margin-left" => 40percent, "margin-top" => 18percent, "opacity" => 0percent,
-    "transition" => 1seconds, "width" => 0percent)
-    push!(emsfooter, button("sourcelink", text = "source", href = "https://github.com/emmettgb/EmsComputer.jl"))
-    push!(emsfooter, button("sourcelink", text = "license", href = "https://github.com/emmettgb/EmsComputer.jl"))
-    push!(emsfooter, button("sourcelink", text = "contact", href = "/contact"))
+     "margin-top" => 30percent, "opacity" => 0percent,
+    "transition" => 1seconds, "width" => 0percent, "position" => "absolute")
+    push!(emsfooter, button("sourcelink", text = "source", onaction = "https://github.com/emmettgb/EmsComputer.jl"))
+    push!(emsfooter, button("sourcelink", text = "license", onaction = "https://github.com/emmettgb/EmsComputer.jl"))
+    push!(emsfooter, button("sourcelink", text = "contact", onaction = "/contact"))
     on(c, "load") do cm::ComponentModifier
         style!(cm, logobg, "opacity" => 100percent, "transform" => "translateX(0%)")
         next!(c, logobg, cm) do cm2::ComponentModifier
-            style!(cm2, main, "height" => 29percent, "opacity" => 100percent)
+            style!(cm2, main, "height" => 31percent, "opacity" => 100percent)
             next!(c, main, cm2) do cm3::ComponentModifier
                 style!(cm3, emsfooter, "opacity" => 100percent, "width" => 100percent)
             end

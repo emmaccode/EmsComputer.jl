@@ -1,8 +1,12 @@
-```data
+```meta
 title = "Introducing: em's computer!"
 sub = "welcome to my new website!"
-img = ""
 author = "emmac"
-readcount = "0"
+tags = "programming,julia"
+readcount = 0
+stars = 0
+```
+```img
+
 ```
 ## welcome to em's computer!
