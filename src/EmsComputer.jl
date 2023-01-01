@@ -4,6 +4,16 @@ using ToolipsSession
 using ToolipsDefaults
 using JSON
 include("Pages.jl")
+mutable struct Post <: Servable
+    readcount::Int64
+    title::String
+    sub::String
+    img::String
+    uri::String
+    function Post()
+
+    end
+end
 """
 ### start(ip::String, port::Integer, routes::Vector{Route};
     extensions::Dict = Dict(:logger => Logger(),
