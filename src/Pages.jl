@@ -2,12 +2,19 @@
 function home(c::Connection)
     uri::String = "/images/animated.gif"
     write!(c, title("thetitle", text = "em's computer !"))
-    write!(c, ToolipsDefaults.sheet("emsstyles"))
+    stylsheet = ToolipsDefaults.sheet("emsstyles")
+    stylsheet[:children]["h2"]["color"] = "white"
+    stylsheet[:children]["h4"]["color"] = "lightblue"
+    stylsheet[:children]["section"]["border-color"] = "gray"
+    write!(c, stylsheet)
     logobg = div("logobg", align = "center")
     style!(logobg, "background" => "transparent", "margin-top" => 5percent,
-    "opacity" => 0percent, "transform" => "translateX(20%)", "transition" => 2seconds)
+    "opacity" => 0percent, "transform" => "translateX(20%)", "transition" => 2seconds,
+    "overflow" => "hidden")
     header = img("emseyes", src = uri, width = 350)
-    push!(logobg, header)
+    betaemblem = h("betaemblem", 3, text = "open-alpha 0.0.5")
+    style!(betaemblem, "color" => "white", "transform" => "translateX(5%)")
+    push!(logobg, header, betaemblem)
     body = Component("mainbody", "body")
     style!(body, "background-color" => "#D6CBDA", "overflow" => "hidden")
     main = divider("maindiv", align = "left")
@@ -57,24 +64,27 @@ function home(c::Connection)
     on(c, skipbutton, "click") do cm::ComponentModifier
         style!(cm, main, "height" => 0percent, "opacity" => "0percent")
         style!(cm, body, "background-color" => "#36454F", "transition" => "2.5s")
-        style!(cm, emsfooter, "opacity" => 0percent)
-        psh = Post("public/content/ems_computer.md")
+        remove!(cm, emsfooter)
         app_panel = section("emsapps")
         style!(app_panel, "background-color" => "#320064", "border-color" => "#141414")
-        push!(app_panel, h("apptitle", 2, text = psh.title))
+        for post_dir in readdir("public/content/posts")
+            psh::Post = Post("public/content/posts/" * post_dir)
+            postbody = section("postbody")
+            push!(postbody, img("$(psh.title)-i", src = psh.img, width = 300),
+             h("$(psh.title)-t", 2, text = psh.title),
+            h("$(psh.title)-st", 4, text = psh.sub))
+            push!(app_panel, postbody)
+        end
         next!(c, main, cm) do cm2::ComponentModifier
-            sleep(1)
+            sleep(2)
             set_children!(cm2, main, [app_panel])
             cm2[header] = "src" => uri
-            style!(cm2, main, "background" => "transparent", "height" => 40percent,
+            style!(cm2, main, "background" => "transparent", "height" => 100percent,
             "width" => 50percent, "opacity" => 100percent, "margin-left" => 25percent,
             "margin-top" => 15px)
             style!(cm2, header, "transform" => "scale(.7)", "transition" => 2seconds,
             "margin-top" => 5px)
-            next!(c, main, cm2) do cm3::ComponentModifier
-
-
-            end
+            style!(cm2, body, "overflow-y" => "scroll")
         end
     end
     push!(loginstuff, loginheading, unamelabel, unamebox, br(), pwdlabel, mainpwdbox,

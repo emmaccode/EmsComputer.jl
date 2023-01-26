@@ -22,7 +22,6 @@ mutable struct Post <: Servable
         metar = maximum(metas) + 1:findnext("```", p, metas[2])[1] - 1
         imgr = maximum(imgs) + 1:findnext("```", p, imgs[2])[1] - 1
         imgdata = p[imgr]
-        println(p[metar])
         metainfo = TOML.parse(p[metar])
         ID = ToolipsSession.gen_ref(16)
         new(ID, metainfo["readcount"], metainfo["stars"], metainfo["title"],
