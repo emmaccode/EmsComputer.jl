@@ -49,7 +49,7 @@ server = EmsComputer.start(ip, port, [r])
 """
 function start(IP::String, PORT::Integer, routes;
     extensions)
-    server = ServerTemplate(IP, PORT, routes, extensions = extensions)
+    server = ServerTemplate(IP, PORT, routes = routes, extensions = extensions)
     server.start()
 end
 
