@@ -1,3 +1,18 @@
+function make_header(c::Connection, uri::String = "/images/animated.gif")
+    header = div("header", align = "center", float = "left")
+    header["top-margin"] = "100px"
+    logo = img("logo", src = uri)
+    logo[:class] = "logo"
+    logo["out"] = "false"
+    on(c, logo, "animationend") do cm::ComponentModifier
+        if cm[logo]["out"] == "true"
+            remove!(cm, logo)
+        end
+    end
+    push!(header, logo)
+    header
+end
+
 function build_main(c::Connection, cm::ComponentModifier, bod::Component{:body})
     style!(cm, "maindiv", "height" => 0percent, "opacity" => "0percent")
     style!(cm, "mainbody", "background-color" => "#36454F", "transition" => "2.5s")
@@ -5,7 +20,7 @@ function build_main(c::Connection, cm::ComponentModifier, bod::Component{:body})
     app_panel = section("emsapps")
     searchbox_div::Component{:div} = div("searchb_c")
     style!(searchbox_div, "background-color" => "#888C8D")
-    searchinput::Component{:div} = ToolipsDefaults.textdiv("searchinp")
+    searchinput::Component{:div} = Components.textdiv("searchinp")
     style!(searchinput, "color" => "white", "background-color" => "#888C8D")
     push!(searchbox_div, searchinput)
     style!(app_panel, "background-color" => "#320064", "border-color" => "#141414")
@@ -23,8 +38,8 @@ function build_main(c::Connection, cm::ComponentModifier, bod::Component{:body})
             end
         end
         push!(postbody, img("$(psh.title)-i", src = psh.img, width = 300),
-         h("$(psh.title)-t", 2, text = psh.title),
-        h("$(psh.title)-st", 4, text = psh.sub))
+         h2("$(psh.title)-t", text = psh.title),
+        h4("$(psh.title)-st", text = psh.sub))
         push!(app_panel, postbody)
     end
     next!(c, bod, cm) do cm2::ComponentModifier
@@ -40,14 +55,14 @@ function build_main(c::Connection, cm::ComponentModifier, bod::Component{:body})
 end
 
 function create_styles()
-    stylsheet::Component{:sheet} = ToolipsDefaults.sheet("emsstyles")
-    stylsheet[:children]["h2"]["color"] = "white"
-    stylsheet[:children]["h4"]["color"] = "lightblue"
-    stylsheet[:children]["section"]["border-color"] = "gray"
+    stylsheet::Component{:sheet} = Component{:sheet}("emsstyles")
+   # stylsheet[:children]["h2"]["color"] = "white"
+   # stylsheet[:children]["h4"]["color"] = "lightblue"
+   # stylsheet[:children]["section"]["border-color"] = "gray"
     stylsheet::Component{:sheet}
 end
 
-function home(c::Connection)
+function home_splash(c::Connection)
     uri::String = "/images/animated.gif"
     write!(c, title("thetitle", text = "em's computer !"))
     write!(c, create_styles())
@@ -56,27 +71,27 @@ function home(c::Connection)
     "opacity" => 0percent, "transform" => "translateX(20%)", "transition" => 2seconds,
     "overflow" => "hidden")
     header = img("emseyes", src = uri, width = 350)
-    betaemblem = h("betaemblem", 3, text = "open-alpha 0.0.5")
+    betaemblem = h3("betaemblem", text = "open-alpha 0.0.5")
     style!(betaemblem, "color" => "white", "transform" => "translateX(5%)")
     push!(logobg, header, betaemblem)
-    body = Component("mainbody", "body")
+    body = Component{:body}("mainbody")
     style!(body, "background-color" => "#D6CBDA", "overflow" => "hidden",
     "transition" => 8seconds)
-    main = divider("maindiv", align = "left")
+    main = div("maindiv", align = "left")
     style!(main, "background-color" => "#36454F", "margin-top" => 2percent,
     "width" => 20percent, "margin-left" => 40percent, "position" => "absolute",
     "opacity" => 0percent, "transition" => 2seconds, "height" => 0percent,
     "overflow" => "hidden")
     loginstuff = div("loginstuff", align = "left")
     style!(loginstuff, "background" => "transparent")
-    unamebox = ToolipsDefaults.textdiv("unamebox", text = "username")
+    unamebox = Components.textdiv("unamebox", text = "username")
     style!(unamebox, "color" => "white", "background-color" => "#888C8D", "font-size" => 14pt)
     on(c, unamebox, "click") do cm::ComponentModifier
         if cm[unamebox]["text"] == "username"
             set_text!(cm, unamebox, "")
         end
     end
-    pwdbox = ToolipsDefaults.textdiv("pwdbox", text = "")
+    pwdbox = Components.textdiv("pwdbox", text = "")
     mainpwdbox = div("mainpwdbox")
     style!(pwdbox, "color" => "white", "background-color" => "#888C8D", "font-size" => 14pt,
     "color" => "#888C8D")
@@ -90,7 +105,7 @@ function home(c::Connection)
         set_children!(cm, overbox,
         Vector{Servable}([img("ex", src = "/images/icons/heart.png", width = 25) for c in 1:length(enteredpwd)]))
     end
-    loginheading = h("loginheading", 1, text = "login")
+    loginheading = h1("loginheading", text = "login")
     style!(loginheading, "color" => "white", "margin-top" => 0px)
     unamelabel = a("unamelabel", text = "username")
     style!(unamelabel, "color" => "lightpink")
@@ -121,9 +136,9 @@ function home(c::Connection)
     push!(emsfooter, button("sourcelink", text = "contact", onaction = "/contact"))
     on(c, "load") do cm::ComponentModifier
         style!(cm, logobg, "opacity" => 100percent, "transform" => "translateX(0%)")
-        next!(c, logobg, cm) do cm2::ComponentModifier
+        next!(c, cm, logobg) do cm2::ComponentModifier
             style!(cm2, main, "height" => 31percent, "opacity" => 100percent)
-            next!(c, main, cm2) do cm3::ComponentModifier
+            next!(c, cm2, main) do cm3::ComponentModifier
                 style!(cm3, emsfooter, "opacity" => 100percent, "width" => 100percent)
             end
         end

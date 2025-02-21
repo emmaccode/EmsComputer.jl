@@ -1,11 +1,11 @@
 module EmsComputer
 using Toolips
+using Toolips.Components
 using ToolipsSession
-using ToolipsDefaults
 using JSON
 using TOML
 include("Pages.jl")
-
+include("Styles.jl")
 mutable struct Post <: Servable
     ID::String
     readcount::Int64
@@ -29,43 +29,21 @@ mutable struct Post <: Servable
     end
 end
 
-"""
-### start(ip::String, port::Integer, routes::Vector{Route};
-    extensions::Dict = Dict(:logger => Logger(),
-    :public => Files("public")))) -> ::Toolips.WebServer
--------------------------------------
-Creates Toolips WebServer from provided routes and starts on provided IP/Port.
-#### example
-```
-using EmsComputer
-ip = "127.0.0.1"
-port = 8000
-r = route("/") do c::Connection
-    write!(c, h("", 1, text = "Hello World!"))
+
+fourofour = route("404") do c
+    header = make_header(c, "/images/animated.gif")
+    write!(c, text_styles())
+    write!(c, header)
+    errormessage = h1("4041", text = "404")
+    second = h2("4042", text = "It looks like something went wrong.")
+    style!(errormessage, text_styles()[1])
+    style!(second, text_styles()[2])
+    write!(c, errormessage, second)
 end
 
-server = EmsComputer.start(ip, port, [r])
-```
-"""
-function start(IP::String, PORT::Integer, routes;
-    extensions)
-    server = ServerTemplate(IP, PORT, routes = routes, extensions = extensions)
-    server.start()
-end
+homepage = route(home_splash, "/")
 
-function make_routes()
-    fourofour = route("404") do c
-        header = make_header("/images/animated.gif")
-        write!(c, text_styles())
-        write!(c, header)
-        errormessage = h("4041", 1, text = "404")
-        second = h("4042", 2, text = "It looks like something went wrong.")
-        style!(errormessage, text_styles()[1])
-        style!(second, text_styles()[2])
-        write!(c, components(errormessage, second))
-    end
-    homepage = route("/", home)
-    routes(homepage, fourofour)
-end
-
+SESSION = Session(["/"])
+files = mount("/" => "public")
+export homepage, fourofour, SESSION, files
 end # - module

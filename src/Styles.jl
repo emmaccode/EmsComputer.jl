@@ -5,38 +5,36 @@ function text_styles()
     heading2_style["color"] = "gray"
     graytxt = Style("p")
     graytxt[:color] = "gray"
-    components(heading1_style, heading2_style, graytxt)
+    [heading1_style, heading2_style, graytxt]
 end
 
 function anim_logoin()
-    lfade = Animation("lfadein", length = 2.8)
-    lfade[:from] = "opacity" => "0%"
-    lfade[:to] = "opacity" => "100%"
-    lfade[:from] = "transform" => "translateX(100%)"
-    lfade[:to] = "transform" => "translateX(0%)"
+    lfade = keyframes("lfadein")
+    keyframes!(lfade, :from, "opacity" => 0percent, "transform" => translateX(100percent))
+    keyframes!(lfade, :to, "opacity" => 100percent, "transform" => translateX(0percent))
     lfade
 end
 
 function move_mainup()
-    animat = Animation("maingoup", length = 2.845)
-    animat[:from] = "transform" => "translateY(0%)"
-    animat[:to] = "transform" => "translateY(-120%)"
+    animat = keyframes("maingoup")
+    keyframes!(animat, :from, "transform" => translatyY(0percent))
+    keyframes!(animat, :to, "transform" => translateY(-120percent))
     animat
 end
 
+
+
 function anim_logoout()
-    lfade = Animation("lfadeout", length = 2.8)
-    lfade[:to] = "opacity" => "0%"
-    lfade[:from] = "opacity" => "100%"
-    lfade[:to] = "transform" => "translateX(-100%)"
-    lfade[:from] = "transform" => "translateX(0%)"
+    lfade = keyframes("lfadeout")
+    keyframes!(lfade, :from, "opacity" => 100percent, "transform" => translateX(0percent))
+    keyframes!(lfade, :to, "opacity" => 0percent, "transform" => translateX(-100percent))
     lfade
 end
 
 function logo_sty()
     logo_style = Style("img.logo")
     logo_style[:width] = "250"
-    animate!(logo_style, anim_logoin())
+    style!(logo_style, "animation-name" => "lfadein", "animation-duration" => 800ms)
     logo_style
 end
 
@@ -49,7 +47,7 @@ function button_style()
 end
 
 function stylesheet()
-    vcat(components(logo_sty(), button_style(), anim_logoin(), anim_logoout(),
-    move_mainup()),
+    vcat([logo_sty(), button_style(), anim_logoin(), anim_logoout(),
+    move_mainup()],
     text_styles())
 end
