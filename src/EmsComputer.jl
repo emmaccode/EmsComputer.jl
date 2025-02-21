@@ -6,6 +6,7 @@ using JSON
 using TOML
 include("Pages.jl")
 include("Styles.jl")
+include("desktop.jl")
 mutable struct Post <: Servable
     ID::String
     readcount::Int64
@@ -21,14 +22,13 @@ mutable struct Post <: Servable
         imgs = findfirst("```img", p)
         metar = maximum(metas) + 1:findnext("```", p, metas[2])[1] - 1
         imgr = maximum(imgs) + 1:findnext("```", p, imgs[2])[1] - 1
-        imgdata = p[imgr]
+        imgdata = replace(p[imgr], "\n" => "")
         metainfo = TOML.parse(p[metar])
         ID = ToolipsSession.gen_ref(16)
         new(ID, metainfo["readcount"], metainfo["stars"], metainfo["title"],
         metainfo["sub"], imgdata, Vector{String}(split(metainfo["tags"], ",")), uri)
     end
 end
-
 
 fourofour = route("404") do c
     header = make_header(c, "/images/animated.gif")
@@ -42,8 +42,8 @@ fourofour = route("404") do c
 end
 
 homepage = route(home_splash, "/")
-
+clients = Toolips.QuickExtension{:clients}()
 SESSION = Session(["/"])
 files = mount("/" => "public")
-export homepage, fourofour, SESSION, files
+export computer_main, fourofour, SESSION, files
 end # - module
