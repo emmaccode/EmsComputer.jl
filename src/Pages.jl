@@ -15,7 +15,7 @@ end
 
 function build_main(c::Connection, cm::ComponentModifier, bod::Component{:body})
     style!(cm, "maindiv", "height" => 0percent, "opacity" => "0percent")
-    style!(cm, "mainbody", "background-color" => "#36454F", "transition" => "2.5s")
+    style!(cm, "mainbody", "background-color" => "#36454F")
     remove!(cm, "emsfooter")
     app_panel = section("emsapps")
     searchbox_div::Component{:div} = div("searchb_c")
@@ -56,9 +56,10 @@ end
 
 function create_styles()
     stylsheet::Component{:sheet} = Component{:sheet}("emsstyles")
-   # stylsheet[:children]["h2"]["color"] = "white"
-   # stylsheet[:children]["h4"]["color"] = "lightblue"
-   # stylsheet[:children]["section"]["border-color"] = "gray"
+    button_style = style("button", "padding" => 10px, "font-weight" => "bold", "font-size" => 11pt, 
+    "color" => "white", "background-color" => "#481d4a", "border-radius" => 3px, 
+    "border" => "1px solid #1e1e1e", "cursor" => "pointer")
+    push!(stylsheet, button_style)
     stylsheet::Component{:sheet}
 end
 

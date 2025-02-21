@@ -1,11 +1,14 @@
 module EmsComputer
 using Toolips
+import Toolips: on_start
+import Base: getindex
 using Toolips.Components
 using ToolipsSession
 using JSON
 using TOML
 include("Pages.jl")
 include("Styles.jl")
+SESSION = Session(["/"])
 include("desktop.jl")
 mutable struct Post <: Servable
     ID::String
@@ -41,9 +44,8 @@ fourofour = route("404") do c
     write!(c, errormessage, second)
 end
 
-homepage = route(home_splash, "/")
 clients = Toolips.QuickExtension{:clients}()
-SESSION = Session(["/"])
+
 files = mount("/" => "public")
-export computer_main, fourofour, SESSION, files
+export computer_main, fourofour, SESSION, files, clients
 end # - module
