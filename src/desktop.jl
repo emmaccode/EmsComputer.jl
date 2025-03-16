@@ -45,7 +45,7 @@ mutable struct ColorPagesApp{T <: Any}
     color::String
 end
 
-APPS = [ColorPagesApp{:posts}("posts", LOGO_URI, "#1e1e1e")]
+APPS = [ColorPagesApp{:posts}("posts", LOGO_URI, "#1e1e1e"), ColorPagesApp{:models}("models", LOGO_URI, "#301934")]
 
 function authenticate_client!(c::AbstractConnection, username::String = "GUEST")
     new_id::String = generate_user_id()
@@ -182,9 +182,8 @@ function build_computer(c::AbstractConnection, computer::ClientComputer)
             end
         end
     end
-    computer_window = div("computer-main", children = boot_button, align = "right")
-    style!(computer_window, "border" => "10px solid #e6d897", "border-radius" => 6px, "min-width" => 85percent, "min-height" => 80percent, 
-    "margin" => 5percent, "background-color" => "#0d0c0b", "max-height" => 80percent, "max-width" => 85percent, "overflow" => "hidden")
+    computer_window = div("computer-main", children = boot_button, align = "left")
+    style!(computer_window, "width" => 100percent, "height" => 100percent, "overflow" => "hidden", "position" => "absolute", "top" => 0percent, "left" => 0percent)
     computer_window
 end
 
@@ -212,7 +211,7 @@ function make_windowmenu(c::AbstractConnection, computer::ClientComputer)
             cm["colorpages-menu"] = "expanded" => "1"
         end
     end
-    style!(bar, "left" => 200percent, "background-color" => "#0c0b0d", "height" => 85percent, "width" => 4percent, "transition" => 700ms)
+    style!(bar, "left" => 200percent, "background-color" => "#0c0b0d", "height" => 100percent, "width" => 4percent, "transition" => 700ms)
     bar
 end
 
@@ -223,7 +222,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
     preview = div("app$(app.appname)", children = [image, name])
     on(c, preview, "dblclick") do cm::ComponentModifier
         app_window = make_windowmenu(c, app)
-        insert!(cm, "computer-main", 1, app_window)
+        append!(cm, "computer-main", app_window)
         set_children!(cm, "colorpages-menu", Vector{AbstractComponent}())
         cm["colorpages-menu"] = "expanded" => "0"
         on(c, cm, 500) do cm2

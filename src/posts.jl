@@ -40,8 +40,8 @@ function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:posts})
 
         end
     end
-    style!(bar, "background-color" => app.color, "height" => 85percent, 
-    "width" => 0percent, "transition" => 700ms, "display" => "inline-block", "display" => "none", 
+    style!(bar, "background-color" => app.color, "height" => 100percent, 
+    "width" => 0percent, "transition" => 1500ms, "display" => "inline-block", "display" => "none", 
     "overflow" => "hidden")
     bar
 end

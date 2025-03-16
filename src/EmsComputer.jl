@@ -11,7 +11,7 @@ include("Styles.jl")
 SESSION = Session(["/"])
 include("desktop.jl")
 include("posts.jl")
-
+include("models.jl")
 
 fourofour = route("404") do c
     header = make_header(c, "/images/animated.gif")
@@ -27,5 +27,8 @@ end
 clients = Toolips.QuickExtension{:clients}()
 
 files = mount("/" => "public")
-export computer_main, fourofour, SESSION, files, clients
+
+model_viewer_files = mount("/modelview" => "glbviewer")
+
+export computer_main, fourofour, SESSION, files, clients, model_viewer_files
 end # - module
