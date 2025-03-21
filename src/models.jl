@@ -49,15 +49,5 @@ end
 
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:models})
-    bar = div("models-menu", align = "right", expanded = 1, children = [MODELS_MAIN])
-    on(c, bar, "click") do cm::ComponentModifier
-        if cm["models-menu"]["expanded"] == "0"
-            style!(cm, "models-menu", "width" => 100percent, "padding" => 2percent)
-
-        end
-    end
-    style!(bar, "background-color" => app.color, "height" => 100percent, 
-    "width" => 0percent, "transition" => 1500ms, "display" => "inline-block", "display" => "none", 
-    "overflow" => "hidden", "padding" => 0percent)
-    bar
+    make_base_windowmenu(c, app, MODELS_MAIN)
 end

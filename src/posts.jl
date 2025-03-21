@@ -33,15 +33,5 @@ for post_dir in readdir("public/content/posts")
 end
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:posts})
-    bar = div("posts-menu", align = "right", expanded = 1, children = [posts_main])
-    on(c, bar, "click") do cm::ComponentModifier
-        if cm["posts-menu"]["expanded"] == "0"
-            style!(cm, "posts-menu", "width" => 100percent)
-
-        end
-    end
-    style!(bar, "background-color" => app.color, "height" => 100percent, 
-    "width" => 0percent, "transition" => 1500ms, "display" => "inline-block", "display" => "none", 
-    "overflow" => "hidden")
-    bar
+    make_base_windowmenu(c, app, posts_main)
 end
