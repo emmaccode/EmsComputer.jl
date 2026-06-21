@@ -45,10 +45,19 @@ mutable struct ColorPagesApp{T <: Any}
     color::String
 end
 
-APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"), ColorPagesApp{:models}("models", "/images/page-icons/3d.png", "#301934"), 
-ColorPagesApp{:files}("files", "/images/page-icons/files.png", "#301934"), ColorPagesApp{:music}("music", "/images/page-icons/music.png", "#301934"), 
-ColorPagesApp{:cad}("cad", "/images/page-icons/cad.png", "#dddddd"), ColorPagesApp{:websites}("websites", "/images/page-icons/websites.png", "#ffffff"), 
-ColorPagesApp{:notebooks}("notebooks", "/images/page-icons/notebooks.png", "#ffffff")]
+APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"), 
+    ColorPagesApp{:packages}("packages", "/images/page-icons/packages.png", "#ffffff"),
+    ColorPagesApp{:websites}("websites", "/images/page-icons/websites.png", "#ffffff"),
+    ColorPagesApp{:software}("software", "/images/page-icons/websites.png", "#ffffff"),
+    ColorPagesApp{:games}("games", "/images/page-icons/cad.png", "#ffffff"),
+    ColorPagesApp{:models}("models", "/images/page-icons/3d.png", "#301934"), 
+   # ColorPagesApp{:files}("files", "/images/page-icons/files.png", "#301934"), 
+    ColorPagesApp{:music}("music", "/images/page-icons/music.png", "#301934"), 
+   # ColorPagesApp{:cad}("cad", "/images/page-icons/cad.png", "#dddddd"), 
+     
+    ColorPagesApp{:notebooks}("notebooks", "/images/page-icons/notebooks.png", "#ffffff"),]
+    
+#   ColorPagesApp{:photos}("photos", "/images/page-icons/photos.png", "#ffffff")]
 
 function authenticate_client!(c::AbstractConnection, username::String = "GUEST")
     new_id::String = generate_user_id()
@@ -159,17 +168,21 @@ end
 
 function build_splash_footer(c::AbstractConnection)
     source_button = button("sourcelink", text = "source")
+    on(source_button, "click") do cl::ClientModifier
+        redirect!(cl, "https://github.com/emmaccode/EmsComputer.jl")
+    end
     license_button = button("licenselink", text = "licensing")
     about_button = button("buttonlink", text = "about")
     emsfooter = div("emsfooter", align = "center", children = [source_button, license_button, about_button])
     style!(emsfooter, "background" => "transparent",
-     "margin-top" => 35percent, "opacity" => 0percent,
+     "margin-top" => 32percent, "opacity" => 0percent,
     "transition" => 700ms, "width" => 30percent, "position" => "absolute", "left" => 0percent)
     emsfooter::Component{:div}
 end
 
 function on_start(ext::Toolips.QuickExtension{:clients}, data::Dict{Symbol, Any}, 
     routes::Vector{<:AbstractRoute})
+    load_posts()
     push!(data, :clients => Vector{ClientComputer}())
 end
 
@@ -210,7 +223,7 @@ function make_windowmenu(c::AbstractConnection, computer::ClientComputer)
         end
     end
     style!(bar, "left" => 200percent, "background-color" => "#0c0b0d", "height" => 100percent, "width" => 3percent, "transition" => 700ms, 
-    "position" => "absolute", "top" => 0percent, "left" => 0percent)
+    "position" => "absolute", "top" => 0percent, "left" => 0percent, "min-width" => 80px, "cursor" => "pointer", "z-index" => 10)
     if computer.open_window != 0
         winmenu = make_windowmenu(c, APPS[computer.open_window])
         return(bar, winmenu)
@@ -255,7 +268,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
         cm["colorpages-menu"] = "expanded" => "0"
         on(c, cm, 500) do cm2
             style!(cm2, "colorpages-menu", "width" => 3percent, "padding" => "0px")
-            style!(cm2, app_window, "width" => 97percent, "left" => 3percent, "display" => "inline-block")
+            style!(cm2, app_window, "width" => 95percent, "left" => 3.3percent, "display" => "inline-block")
         end
     end
     style!(preview, "padding" => 5px, "cursor" => "pointer")
