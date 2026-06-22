@@ -89,6 +89,7 @@ end
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:posts})
     menu = make_base_windowmenu(c, app, posts_main)
+    menu[:align] = "left"
     style!(menu, "overflow-x" => "visible", "overflow-y" => "scroll")
     menu
 end

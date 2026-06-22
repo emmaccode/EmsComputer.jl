@@ -83,6 +83,9 @@ SESSION = Session(["/"])
 include("desktop.jl")
 include("pages/posts.jl")
 include("pages/models.jl")
+include("pages/packages.jl")
+include("pages/games.jl")
+include("pages/software.jl")
 
 fourofour = route("404") do c
     header = build_logo_header()

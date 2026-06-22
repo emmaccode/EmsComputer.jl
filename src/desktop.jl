@@ -46,16 +46,16 @@ mutable struct ColorPagesApp{T <: Any}
 end
 
 APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"), 
-    ColorPagesApp{:packages}("packages", "/images/page-icons/packages.png", "#ffffff"),
-    ColorPagesApp{:websites}("websites", "/images/page-icons/websites.png", "#ffffff"),
-    ColorPagesApp{:software}("software", "/images/page-icons/websites.png", "#ffffff"),
-    ColorPagesApp{:games}("games", "/images/page-icons/cad.png", "#ffffff"),
+    ColorPagesApp{:packages}("packages", "/images/page-icons/packages.png", "#ff6347"),
+    ColorPagesApp{:websites}("websites", "/images/page-icons/websites.png", "#ff4787"),
+    ColorPagesApp{:software}("software", "/images/page-icons/websites.png", "#E3D081"),
+    ColorPagesApp{:games}("games", "/images/page-icons/cad.png", "#91C7B1"),
     ColorPagesApp{:models}("models", "/images/page-icons/3d.png", "#301934"), 
    # ColorPagesApp{:files}("files", "/images/page-icons/files.png", "#301934"), 
-    ColorPagesApp{:music}("music", "/images/page-icons/music.png", "#301934"), 
+    ColorPagesApp{:music}("music", "/images/page-icons/music.png", "#B33951"), 
    # ColorPagesApp{:cad}("cad", "/images/page-icons/cad.png", "#dddddd"), 
      
-    ColorPagesApp{:notebooks}("notebooks", "/images/page-icons/notebooks.png", "#ffffff"),]
+    ColorPagesApp{:notebooks}("notebooks", "/images/page-icons/notebooks.png", "#FFB269"),]
     
 #   ColorPagesApp{:photos}("photos", "/images/page-icons/photos.png", "#ffffff")]
 
