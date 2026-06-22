@@ -1,4 +1,19 @@
+function make_model_downloadbox(model_name::String)
+    nameb = div("-", text = model_name, style = "background-color:white;display:inline-flex;width:70%;font-weight:bold;padding:1.5%;")
+    blender_b = div("$model_name-blender", text = "download blender")
+    style!(blender_b, "background-color" => "#ad4d0c", "padding-left" => 20px, "display" => "inline-flex", "color" => "whitesmoke", "font-weight" => "bold",
+        "padding" => 1.5percent)
+    glb_b = div("$model_name-blender", text = "download glb")
+    style!(glb_b, "background-color" => "darkblue", "display" => "inline-flex", "color" => "whitesmoke", "font-weight" => "bold", 
+        "padding" => 1.5percent)
+    dl_box = div(model_name, children = [nameb, glb_b, blender_b], align = "left")
+    style!(dl_box, "width" => 100percent, "padding" => 2percent)
+    dl_box::Component{:div}
+end
+
+
 MODELS_MAIN = begin
+    showcase_heading = h1(text = "showcase")
     model_previews = [begin
         folder_name = split(model_meta, "-")
         model_name = replace(folder_name[2], ".txt" => "")
@@ -33,7 +48,7 @@ MODELS_MAIN = begin
             model_title = h3(text = model_name)
             model_desc = tmd("-", read("public/media/models/meta" * "/$model_meta", String))
             new_dialog = div("popup", children = [close_button_wrapper, model_title, model_desc])
-            style!(new_dialog, "background-color" => "white", "padding" => 10px, "border" => "3px solid #1e1e1e", "z-index" => 10, 
+            style!(new_dialog, "background-color" => "#060317", "padding" => 10px, "border" => "3px solid #1e1e1e", "z-index" => 10, 
             "position" => "absolute", "width" => 20percent, "left" => 40percent, "top" => 30percent)
             append!(cm, "mainbody", new_dialog)
         end
@@ -42,10 +57,19 @@ MODELS_MAIN = begin
         style!(model_div, "border" => "2px solid #1e1e1e", "border-radius" => 5px, "display" => "block")
         model_div
     end for model_meta in readdir("public/media/models/meta")]
-    preview_box = div("modelmain", children = model_previews)
-    style!(preview_box, "display" => "flex", "padding" => 2percent)
+    showcase_container = div("showcase", children = [showcase_heading, model_previews ...], align = "left")
+    style!(showcase_container, "border-radius" => 4pt, "padding" => 3percent, "background-color" => "#1f1d29", "display" => "grid")
+    non_showcase = [begin
+        make_model_downloadbox(model_name)
+    end for model_name in readdir("public/media/models/not_showcase")]
+    preview_box = div("modelmain", children = AbstractComponent[showcase_container])
+    if length(non_showcase) > 0
+        push!(preview_box, h2(text = "more models", align = "left"), non_showcase ...)
+    end
+    style!(preview_box, "padding" => 5percent)
     preview_box
 end
+
 
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:models})

@@ -85,14 +85,18 @@ include("pages/posts.jl")
 include("pages/models.jl")
 
 fourofour = route("404") do c
-    header = make_header(c, "/images/animated.gif")
+    header = build_logo_header()
+    set_style!(header, "padding" => 10percent)
     write!(c, text_styles())
     write!(c, header)
     errormessage = h1("4041", text = "404")
-    second = h2("4042", text = "It looks like something went wrong.")
-    style!(errormessage, text_styles()[1])
-    style!(second, text_styles()[2])
-    write!(c, errormessage, second)
+    second = h2("4042", text = "Error 404, page not found")
+    style!(errormessage, "padding" => 50px, "color" => "#2f2c3d")
+    style!(second, "color" => "#56516e", "padding" => 50px)
+    back_button = button("back", text = "back to em's computer", align = "center")
+    style!(back_button, "padding" => 1percent, "background-color" => "#5445a1", "cursor" => "pointer")
+    on(cl -> redirect!(cl, "/"), back_button, "click")
+    write!(c, errormessage, second, back_button)
 end
 
 clients = Toolips.QuickExtension{:clients}()

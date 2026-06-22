@@ -175,7 +175,7 @@ function build_splash_footer(c::AbstractConnection)
     about_button = button("buttonlink", text = "about")
     emsfooter = div("emsfooter", align = "center", children = [source_button, license_button, about_button])
     style!(emsfooter, "background" => "transparent",
-     "margin-top" => 32percent, "opacity" => 0percent,
+     "margin-top" => 40percent, "opacity" => 0percent,
     "transition" => 700ms, "width" => 30percent, "position" => "absolute", "left" => 0percent)
     emsfooter::Component{:div}
 end
@@ -241,7 +241,7 @@ function make_base_windowmenu(c::Toolips.AbstractConnection, app::ColorPagesApp{
     end
     style!(bar, "background-color" => app.color, "height" => 100percent, 
     "width" => 0percent, "transition" => 700ms, "display" => "inline-block", 
-    "overflow" => "hidden", "padding" => 0percent, "position" => "absolute", "left" => 100percent, "top" => 0percent)
+    "overflow" => "hidden", "padding" => 0percent, "position" => "absolute", "left" => 0percent, "top" => 0percent)
     bar
 end
 
@@ -268,7 +268,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
         cm["colorpages-menu"] = "expanded" => "0"
         on(c, cm, 500) do cm2
             style!(cm2, "colorpages-menu", "width" => 3percent, "padding" => "0px")
-            style!(cm2, app_window, "width" => 95percent, "left" => 3.3percent, "display" => "inline-block")
+            style!(cm2, app_window, "width" => 96.6percent, "left" => 3.4percent, "display" => "inline-block")
         end
     end
     style!(preview, "padding" => 5px, "cursor" => "pointer")

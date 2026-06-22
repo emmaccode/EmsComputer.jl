@@ -55,7 +55,7 @@ function build_post_preview(post::Post)
         style!(closebutton, "background-color" => "#911048", "color" => "white", "width" => 94percent, 
             "margin-bottom" => 100px)
         post_body = div("postbody", children = Vector{AbstractComponent}([closebutton]))
-        style!(post_body, "width" => 100percent, "height" => 100percent, "z-index" => 15, "padding" => 3percent, 
+        style!(post_body, "width" => 94percent, "height" => 100percent, "z-index" => 15, "padding" => 3percent, 
         "background-color" => "#513154", "position" => "absolute", "left" => 0px, "top" => 0px)
         if length(childs) == 3
             push!(post_body, childs[2:3] ..., childs[1])
@@ -88,9 +88,6 @@ function load_posts()
 end
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:posts})
-   # for post in posts_main[:children]
-    #    on("click$(post.name)", c, post, "click")
-   # end
     menu = make_base_windowmenu(c, app, posts_main)
     style!(menu, "overflow-x" => "visible", "overflow-y" => "scroll")
     menu
