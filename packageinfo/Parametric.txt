@@ -1,0 +1,7 @@
+Olive is a notebook editor.
+---
+process manager
+---
+https://github.com/ChifiSource/image_dump/raw/main/parametricprocesses/parproc.png?raw=true
+---
+ChifiSource#parametric

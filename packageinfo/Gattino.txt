@@ -1,0 +1,11 @@
+Algebraframes is an **out-of-memory** data ecosystem for 
+managing larger swaths of data. This package allows us to 
+create calculated dimensions, active-read data from files, 
+and make mutable copies without sacrificing memory usage.
+---
+visualization library
+---
+https://github.com/ChifiSource/image_dump/raw/main/gattino/gattino.png?raw=true
+---
+ChifiSource#gattino
+

@@ -1,0 +1,10 @@
+Algebraframes is an **out-of-memory** data ecosystem for 
+managing larger swaths of data. This package allows us to 
+create calculated dimensions, active-read data from files, 
+and make mutable copies without sacrificing memory usage.
+---
+data management framework
+---
+https://github.com/ChifiSource/image_dump/raw/main/algebraframes/alframe.png?raw=true
+---
+ChifiSource#algebra-frames
