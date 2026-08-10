@@ -1,4 +1,4 @@
-function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:software})
+function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:websites})
     software_previews = [begin
         make_software_preview(data)
     end for data in split(read("public/software.txt", String), "--==--")]
@@ -9,7 +9,7 @@ function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:software})
     menu
 end
 
-function make_software_preview(data::AbstractString)
+function make_website_preview(data::AbstractString)
     splts = split(data, "---")
     software_name = replace(splts[1], "\n" => "")
     cover_img = img(src = splts[3], width = 150)

@@ -7,6 +7,8 @@ using ToolipsSession
 using JSON
 using TOML
 
+ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
+
 function text_styles()
     heading1_style = Style("h1")
     heading1_style["color"] = "white"
@@ -86,6 +88,9 @@ include("pages/models.jl")
 include("pages/packages.jl")
 include("pages/games.jl")
 include("pages/software.jl")
+include("pages/websites.jl")
+include("pages/music.jl")
+include("pages/software_pages.jl")
 
 fourofour = route("404") do c
     header = build_logo_header()
@@ -105,8 +110,8 @@ end
 clients = Toolips.QuickExtension{:clients}()
 
 files = mount("/" => "public")
-
+push!(ROUTES, computer_main, fourofour)
 model_viewer_files = mount("/modelview" => "glbviewer")
 
-export computer_main, fourofour, SESSION, files, clients, model_viewer_files
+export ROUTES, SESSION, files, clients, model_viewer_files
 end # - module

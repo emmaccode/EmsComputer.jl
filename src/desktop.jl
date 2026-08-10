@@ -58,6 +58,7 @@ APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"
     ColorPagesApp{:notebooks}("notebooks", "/images/page-icons/notebooks.png", "#FFB269"),]
     
 #   ColorPagesApp{:photos}("photos", "/images/page-icons/photos.png", "#ffffff")]
+#   ColorPagesApp{:graphics}("graphics", "/images/page-icons/photos.png", "#ffffff")]
 
 function authenticate_client!(c::AbstractConnection, username::String = "GUEST")
     new_id::String = generate_user_id()
@@ -67,9 +68,6 @@ function authenticate_client!(c::AbstractConnection, username::String = "GUEST")
 end
 
 write_style_defaults!(c::AbstractConnection) = write!(c, title("thetitle", text = "em's computer !"), create_styles())
-
-
-
 
 function build_logo_header()
     header = img("emseyes", src = LOGO_URI, width = 350)
@@ -199,31 +197,34 @@ close_app_button = div("appclose", children = [close_appimage, close_appname])
 style!(close_app_button, "padding" => 5px, "cursor" => "pointer")
 
 on(SESSION, "close_appmenu") do cm::ComponentModifier
-    style!(cm, "colorpages-menu", "width" => 3percent, "padding" => "0px")
+    style!(cm, "colorpages-menu", "height" => 10percent, "top" => 90percent, "padding" => "0px")
     set_children!(cm, "colorpages-menu", Vector{AbstractComponent}([COLORPAGES_ICON]))
     cm["colorpages-menu"] = "expanded" => "0"
+    cm["colorpages-menu"] = "align" => "center"
 end
 on("close_appmenu", close_app_button, "click")
 
 COLORPAGES_ICON = img("appimage", width = 27px, src = "/images/page-icons/colorpages.png")
-style!(COLORPAGES_ICON, "margin-top" => 700percent, "margin-left" => 25percent)
+style!(COLORPAGES_ICON, "margin-top" => 4percent)
 
 function make_windowmenu(c::AbstractConnection, computer::ClientComputer)
-    bar = div("colorpages-menu", align = "left", expanded = 0, children = [COLORPAGES_ICON])
+    bar = div("colorpages-menu", align = "center", expanded = 0, children = [COLORPAGES_ICON])
     on(c, bar, "click") do cm::ComponentModifier
         if cm["colorpages-menu"]["expanded"] == "0"
-            style!(cm, "colorpages-menu", "width" => 100percent, "padding" => 20px)
+            cm["colorpages-menu"] = "align" => "left"
+            style!(cm, "colorpages-menu", "height" => 100percent, "top" => 0percent, "padding" => 20px)
             open_window = computer.open_window
             if open_window != 0
-                style!(cm, APPS[open_window].appname * "-menu", "width" => 0percent)
+                remove!(cm, APPS[open_window].appname * "-menu")
             end
             set_children!(cm, "colorpages-menu", 
             Vector{AbstractComponent}([close_app_button, (make_app_preview(c, app) for app in APPS) ...]))
             cm["colorpages-menu"] = "expanded" => "1"
         end
     end
-    style!(bar, "left" => 200percent, "background-color" => "#0c0b0d", "height" => 100percent, "width" => 3percent, "transition" => 700ms, 
-    "position" => "absolute", "top" => 0percent, "left" => 0percent, "min-width" => 80px, "cursor" => "pointer", "z-index" => 10)
+    style!(bar, "left" => 200percent, "background-color" => "#0c0b0d", "height" => 10percent, "width" => 100percent, "transition" => 700ms, 
+    "position" => "absolute", "top" => 90percent, "left" => 0percent, "min-width" => 80px, "cursor" => "pointer", "z-index" => 10, 
+    "user-select" => "none")
     if computer.open_window != 0
         winmenu = make_windowmenu(c, APPS[computer.open_window])
         return(bar, winmenu)
@@ -233,14 +234,9 @@ end
 
 function make_base_windowmenu(c::Toolips.AbstractConnection, app::ColorPagesApp{<:Any}, page::Component{<:Any} = div("page", text = "this page is not implemented"))
     cpagename = app.appname
-    bar = div("$cpagename-menu", align = "right", expanded = 1, children = [page])
-    on(c, bar, "click") do cm::ComponentModifier
-        if cm["$cpagename-menu"]["expanded"] == "0"
-            style!(cm, "$cpagename-menu", "width" => 100percent, "padding" => 2percent)
-        end
-    end
+    bar = div("$cpagename-menu", align = "left", expanded = 1, children = [page])
     style!(bar, "background-color" => app.color, "height" => 100percent, 
-    "width" => 0percent, "transition" => 700ms, "display" => "inline-block", 
+    "width" => 100percent, "transition" => 700ms, "display" => "inline-block", 
     "overflow" => "hidden", "padding" => 0percent, "position" => "absolute", "left" => 0percent, "top" => 0percent)
     bar
 end
@@ -267,8 +263,9 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
         set_children!(cm, "colorpages-menu", Vector{AbstractComponent}([COLORPAGES_ICON]))
         cm["colorpages-menu"] = "expanded" => "0"
         on(c, cm, 500) do cm2
-            style!(cm2, "colorpages-menu", "width" => 3percent, "padding" => "0px")
-            style!(cm2, app_window, "width" => 96.6percent, "left" => 3.4percent, "display" => "inline-block")
+            style!(cm2, "colorpages-menu", "height" => 10percent, "top" => 90percent)
+            cm2["colorpages-menu"] = "align" => "center"
+            style!(cm2, app_window, "height" => 90percent, "top" => 0percent)
         end
     end
     style!(preview, "padding" => 5px, "cursor" => "pointer")
