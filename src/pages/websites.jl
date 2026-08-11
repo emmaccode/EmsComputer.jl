@@ -1,7 +1,7 @@
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:websites})
     software_previews = [begin
-        make_software_preview(data)
-    end for data in split(read("public/software.txt", String), "--==--")]
+        make_website_preview(data)
+    end for data in split(read("public/websites.txt", String), "--==--")]
     main_app = div("mainsoftware", children = software_previews)
     menu = make_base_windowmenu(c, app, main_app)
     style!(menu, "overflow-x" => "hidden", "overflow-y" => "scroll")
@@ -20,10 +20,7 @@ function make_website_preview(data::AbstractString)
     desc = div("-", text = splts[2])
     style!(desc, "color" => "white", "font-size" => 15pt)
     preview = div("popup$software_name", children = [img_wrapper, 
-        namebox, desc])
-    on(preview, "click") do cl
-        redirect!(cl, "/$(lowercase(software_name))")
-    end
+        namebox, desc], onclick = "'window.location.href = \"$(replace(splts[4], "\n" => ""))\";'")
     style!(preview, "border-radius" => 5pt, "padding" => 10percent, 
         "background-color" => "#885696", "cursor" => "pointer", "margin" => 10px, 
         "border" => "2px solid #1e1e1e")

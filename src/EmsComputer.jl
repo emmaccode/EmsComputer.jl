@@ -108,7 +108,7 @@ fourofour = route("404") do c
 end
 
 clients = Toolips.QuickExtension{:clients}()
-
+routes = nothing
 files = mount("/" => "public")
 push!(ROUTES, computer_main, fourofour)
 model_viewer_files = mount("/modelview" => "glbviewer")

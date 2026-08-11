@@ -130,7 +130,6 @@ function build_splash(c::AbstractConnection)
             append!(cm2, "mainbody", computer)
             on(cm2, 300) do cl
                 style!(cl, "computer-main", "opacity" => 100percent)
-                style!(cl, "mainbody", "background-color" => "#A63855")
             end
         end
     end
@@ -205,18 +204,15 @@ end
 on("close_appmenu", close_app_button, "click")
 
 COLORPAGES_ICON = img("appimage", width = 27px, src = "/images/page-icons/colorpages.png")
-style!(COLORPAGES_ICON, "margin-top" => 4percent)
+style!(COLORPAGES_ICON, "margin-top" => 40px)
 
 function make_windowmenu(c::AbstractConnection, computer::ClientComputer)
     bar = div("colorpages-menu", align = "center", expanded = 0, children = [COLORPAGES_ICON])
     on(c, bar, "click") do cm::ComponentModifier
         if cm["colorpages-menu"]["expanded"] == "0"
             cm["colorpages-menu"] = "align" => "left"
-            style!(cm, "colorpages-menu", "height" => 100percent, "top" => 0percent, "padding" => 20px)
+            style!(cm, "colorpages-menu", "height" => 100percent, "top" => 0percent)
             open_window = computer.open_window
-            if open_window != 0
-                remove!(cm, APPS[open_window].appname * "-menu")
-            end
             set_children!(cm, "colorpages-menu", 
             Vector{AbstractComponent}([close_app_button, (make_app_preview(c, app) for app in APPS) ...]))
             cm["colorpages-menu"] = "expanded" => "1"
@@ -235,7 +231,7 @@ end
 function make_base_windowmenu(c::Toolips.AbstractConnection, app::ColorPagesApp{<:Any}, page::Component{<:Any} = div("page", text = "this page is not implemented"))
     cpagename = app.appname
     bar = div("$cpagename-menu", align = "left", expanded = 1, children = [page])
-    style!(bar, "background-color" => app.color, "height" => 100percent, 
+    style!(bar, "background-color" => app.color, "height" => 90percent, 
     "width" => 100percent, "transition" => 700ms, "display" => "inline-block", 
     "overflow" => "hidden", "padding" => 0percent, "position" => "absolute", "left" => 0percent, "top" => 0percent)
     bar
@@ -249,7 +245,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
     name = h1("applabel", text = app.appname)
     style!(name, "color" => "white", "font-size" => 12pt, "font-weight" => "bold")
     image = img("appimage", width = 64, src = app.icon)
-    preview = div("app$(app.appname)", children = [image, name])
+    preview = a("app$(app.appname)", children = [image, name])
     on(c, preview, "click") do cm::ComponentModifier
         app_window = make_windowmenu(c, app)
         append!(cm, "computer-main", app_window)
@@ -262,7 +258,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
         computer.open_window = UInt8(f)
         set_children!(cm, "colorpages-menu", Vector{AbstractComponent}([COLORPAGES_ICON]))
         cm["colorpages-menu"] = "expanded" => "0"
-        on(c, cm, 500) do cm2
+        on(c, cm, 50) do cm2
             style!(cm2, "colorpages-menu", "height" => 10percent, "top" => 90percent)
             cm2["colorpages-menu"] = "align" => "center"
             style!(cm2, app_window, "height" => 90percent, "top" => 0percent)
@@ -279,7 +275,7 @@ computer_main = route("/") do c::AbstractConnection
         computer = c[:clients][get_client_id(c)]
         write_style_defaults!(c)
         mainbod = body("mainbody", children = [build_computer(c, computer)])
-        style!(mainbod, "background-color" => "#A63855")
+        style!(mainbod, "background-color" => "#36454F")
         write!(c, mainbod)
     else
         build_splash(c)

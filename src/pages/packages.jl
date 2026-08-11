@@ -4,7 +4,8 @@ function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:packages})
     end for packagen in readdir("packageinfo")]
     main_app = div("mainpackages", children = package_previews)
     menu = make_base_windowmenu(c, app, main_app)
-    style!(menu, "overflow-x" => "hidden", "overflow-y" => "scroll")
+    style!(menu, "overflow-x" => "hidden", "overflow-y" => "scroll", "padding" => 5percent, 
+        "width" => 92percent, "padding-top" => 0percent, "padding-bottom" => 0percent)
     menu[:align] = "left"
     menu
 end
@@ -14,17 +15,17 @@ function make_package_preview(c::AbstractConnection, name::String)
     name = replace(name, ".txt" => ".jl")
     splts = split(raw_data, "---")
     cover_img = img(src = splts[3], width = 175)
-    img_wrapper = div("-", children = [cover_img], align = "center")
+    img_wrapper = div("-", children = [cover_img], align = "center", style = "background-color:#f0eadd;border-radius:7pt;")
     title = div("-", text = name)
     description = div("-", text = splts[2])
     style!(title, "background-color" => "white", "font-weight" => "bold", 
-        "padding" => 1percent, "display" => "flex", "width" => 100percent)
-    style!(description, "background-color" => "#8c2986", "padding" => 1percent, 
-        "display" => "flex", "width" => 100percent)
+        "padding" => 1percent, "display" => "flex", "width" => 100percent, "font-size" => 20pt)
+    style!(description, "background-color" => "#34163b", "padding" => 1percent, 
+        "display" => "flex", "width" => 100percent, "color" => "white")
     info_wrapper = div("-", children = [title, description])
     style!(info_wrapper, "margin-top" => 40px, "width" => 100percent)
     preview = div("$name-preview", children = [img_wrapper, info_wrapper])
-    style!(preview, "background-color" => "#a88da7", "padding" => 4percent, 
+    style!(preview, "background-color" => "#0a080a", "padding" => 4percent,  
         "border-radius" => 3pt, "border" => "2px solid #1e1e1e", "cursor" => "pointer")
     on(c, preview, "click") do cm::ComponentModifier
         if "popup" in cm
@@ -45,7 +46,7 @@ function make_package_popup(name::String)
     img_url = splts[3]
     cov_img = img(src = splts[3], width = 150)
     lnk = replace(splts[4], "\n" => "")
-    img_wrap = div("-", children = [cov_img], align = "center", style = "padding:1%;")
+    img_wrap = div("-", children = [cov_img], align = "center", style = "padding:1%;background-color:#f0eadd;")
     descript = div("-", text = desc)
     style!(descript, "background-color" => "white", "padding" => 1.5percent)
     link = div("ecolink", text = "view ecosystem")
