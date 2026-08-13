@@ -11,7 +11,7 @@ function build_nbdirectory_container(c::AbstractConnection, uri::String)
 end
 
 function make_nb_directories(c::AbstractConnection, uri::String)
-    current_uri = "public/$uri/"
+    current_uri = "public/content/$uri/"
     [begin
         if isfile(current_uri * filename)
             make_nbitem_file(c, current_uri, filename)
@@ -55,14 +55,12 @@ function read_notebook_into_components(notebook_uri::String)
     else
         Vector{IPyCells.Cell}
     end
-    AbstractComponent[begin 
-        make_cell_preview(cell)
-    end for cell in cells]
+    Vector{AbstractComponent}([make_cell_preview(cell) for cell in cells])
 end
 
 function make_base_preview(cell::Cell{<:Any})
     cell_source = div("src", text = cell.source)
-    style!(cell.source, "background-color" => "#c0adc7", "padding" => 30px, "border-radius" => 5pt)
+    style!(cell_source, "background-color" => "#c0adc7", "padding" => 30px, "border-radius" => 5pt)
     outputs = div("-", text = string(cell.outputs))
     container = div("-", children = [cell_source, outputs])
 end
@@ -77,7 +75,7 @@ end
 
 function make_cell_preview(cell::Cell{:code})
     preview = make_base_preview(cell)
-    sourcebox = preview.children["src"]
+    sourcebox = preview[:children]["src"]
     set_text!(JL_highlighter, cell.source)
     OliveHighlighters.mark_julia!(JL_highlighter)
     sourcebox[:text] = string(JL_highlighter)

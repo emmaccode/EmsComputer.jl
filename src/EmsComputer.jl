@@ -8,7 +8,7 @@ using JSON
 using TOML
 using OliveHighlighters
 using IPyCells
-
+using IPyCells: Cell
 ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
 
 function text_styles()
@@ -92,6 +92,7 @@ include("pages/games.jl")
 include("pages/software.jl")
 include("pages/websites.jl")
 include("pages/music.jl")
+include("pages/notebooks.jl")
 include("pages/software_pages.jl")
 
 fourofour = route("404") do c
