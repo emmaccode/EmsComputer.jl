@@ -46,10 +46,10 @@ mutable struct ColorPagesApp{T <: Any}
 end
 
 APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"), 
-    ColorPagesApp{:packages}("packages", "/images/page-icons/packages.png", "#ff6347"),
+    ColorPagesApp{:packages}("julia packages", "/images/page-icons/packages.png", "#ff6347"),
     ColorPagesApp{:websites}("websites", "/images/page-icons/websites.png", "#ff4787"),
-    ColorPagesApp{:software}("software", "/images/page-icons/websites.png", "#E3D081"),
-    ColorPagesApp{:games}("games", "/images/page-icons/cad.png", "#91C7B1"),
+    ColorPagesApp{:software}("software", "/images/page-icons/software.png", "#E3D081"),
+    ColorPagesApp{:games}("games", "/images/page-icons/games.png", "#91C7B1"),
     ColorPagesApp{:models}("models", "/images/page-icons/3d.png", "#301934"), 
    # ColorPagesApp{:files}("files", "/images/page-icons/files.png", "#301934"), 
     ColorPagesApp{:music}("music", "/images/page-icons/music.png", "#B33951"), 
@@ -245,7 +245,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
     name = h1("applabel", text = app.appname)
     style!(name, "color" => "white", "font-size" => 12pt, "font-weight" => "bold")
     image = img("appimage", width = 64, src = app.icon)
-    preview = a("app$(app.appname)", children = [image, name])
+    preview = div("app$(app.appname)", children = [image, name])
     on(c, preview, "click") do cm::ComponentModifier
         app_window = make_windowmenu(c, app)
         append!(cm, "computer-main", app_window)
