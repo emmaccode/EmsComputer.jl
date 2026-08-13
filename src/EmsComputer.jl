@@ -6,6 +6,8 @@ using Toolips.Components
 using ToolipsSession
 using JSON
 using TOML
+using OliveHighlighters
+using IPyCells
 
 ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
 
