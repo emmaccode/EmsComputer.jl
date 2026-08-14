@@ -94,6 +94,7 @@ include("pages/websites.jl")
 include("pages/music.jl")
 include("pages/notebooks.jl")
 include("pages/software_pages.jl")
+include("pages/blog.jl")
 
 fourofour = route("404") do c
     header = build_logo_header()

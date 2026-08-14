@@ -7,7 +7,7 @@ function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:notebooks})
 end
 
 function build_nbdirectory_container(c::AbstractConnection, uri::String)
-    directory_box = div("directories", children = make_nb_directories(c, uri), align = "center",
+    directory_box = div("directories", children = make_nb_directories(c, uri),
         style="padding:4%;overflow-y:scroll;")
 end
 
@@ -49,7 +49,8 @@ function make_nbitem_file(c::AbstractConnection, current_uri::AbstractString, fi
             set_children!(cm, "directories", nb_comps)
         end
     end
-    download_button = button(text = "download")
+    lnk = replace(current_uri * filename, "public" => "")
+    download_button = button(text = "download", onclick = "'window.location.href = \"$lnk\";'")
     common = ("padding" => 1percent, "color" => "white", "border-radius" => 3pt, "font-size" => 18pt)
     style!(download_button, "background-color" => "#1e1e1e", common ...)
     style!(open_button, "background-color" => "#449e71", common ...)
