@@ -73,5 +73,7 @@ end
 
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:models})
-    make_base_windowmenu(c, app, MODELS_MAIN)
+    menu = make_base_windowmenu(c, app, MODELS_MAIN)
+    style!(menu, "overflow-y" => "scroll")
+    menu
 end

@@ -232,7 +232,7 @@ function make_base_windowmenu(c::Toolips.AbstractConnection, app::ColorPagesApp{
     cpagename = app.appname
     bar = div("$cpagename-menu", align = "left", expanded = 1, children = [page])
     style!(bar, "background-color" => app.color, "height" => 90percent, 
-    "width" => 100percent, "transition" => 700ms, "display" => "inline-block", 
+    "width" => 100percent, "transition" => 700ms, 
     "overflow" => "hidden", "padding" => 0percent, "position" => "absolute", "left" => 0percent, "top" => 0percent)
     bar
 end

@@ -7,7 +7,8 @@ function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:notebooks})
 end
 
 function build_nbdirectory_container(c::AbstractConnection, uri::String)
-    directory_box = div("directories", children = make_nb_directories(c, uri), style="padding:4%;overflow:scroll;")
+    directory_box = div("directories", children = make_nb_directories(c, uri), align = "center",
+        style="padding:4%;overflow-y:scroll;")
 end
 
 function make_nb_directories(c::AbstractConnection, uri::String)
@@ -22,15 +23,14 @@ function make_nb_directories(c::AbstractConnection, uri::String)
     if uri != "notebooks"
         new_bar = div("returner", text = "...", align = "center")
         style!(new_bar, "padding" => 3percent, "background-color" => "darkred", "font-weight" => "bold", "color" => "white")
-        insert!(dirs, 1, returner)
+        insert!(dirs, 1, new_bar)
     end
     dirs
 end
 
 function make_nbitem_file(c::AbstractConnection, current_uri::AbstractString, filename::AbstractString)
     label = a(text = replace(filename, ".ipynb" => "", ".jl" => ""))
-    style!(label, "padding" => 1percent, "background-color" => "white", "font-size" => 18pt, "font-weight" => "bold", 
-        "width" => 50percent)
+    style!(label, "padding" => 1percent, "background-color" => "white", "font-size" => 18pt, "font-weight" => "bold")
     open_button = button(text = "open")
     on(c, open_button, "click") do cm::ComponentModifier
         header = img("emseyes", src = LOGO_URI, width = 350)
@@ -44,21 +44,22 @@ function make_nbitem_file(c::AbstractConnection, current_uri::AbstractString, fi
         end
     end
     download_button = button(text = "download")
-    common = ("padding" => 1percent, "color" => "white", "border-radius" => 3pt, "font-size" => 18pt, "width" => 25percent)
+    common = ("padding" => 1percent, "color" => "white", "border-radius" => 3pt, "font-size" => 18pt)
     style!(download_button, "background-color" => "#1e1e1e", common ...)
     style!(open_button, "background-color" => "#449e71", common ...)
-    box = div("nbitem", children = [label, open_button, download_button])
+    box = div("nbitem", children = [label, open_button, download_button], style = "width:100%;display:inline-flex")
 end
 
-function make_nbitem_folder(current_uri::AbstractString, filename::AbstractString)
+function make_nbitem_folder(c::AbstractConnection, current_uri::AbstractString, filename::AbstractString)
     label = a(text = filename)
-    style!(label, "padding" => .5percent)
-    open_button = a(text = "open")
-    download_button = a(text = "download")
-    common = ("padding" => .5percent, "color" => "white", "border-radius" => 3pt)
-    style!(download_button, "background-color" => "#1e1e1e", common ...)
-    style!(open_button, "background-color" => "#449e71", common ...)
-    box = div("nbitem", children = [label, open_button, download_button])
+    ficon = img(src = "/images/page-icons/files.png", width = 50px, 
+        style = "background-color:#1e1e1e;padding:1%")
+    style!(label, "padding" => 1percent, "cursor" => "pointer", "color" => "white", "background-color" => "#1e1e1e", "font-size" => 18pt, "font-weight" => "bold", 
+        "margin-left" => 8px)
+    on(c, label, "click") do cm::ComponentModifier
+        set_children!(cm, "directories", make_nb_directories(c, "notebooks/$filename"))
+    end
+    box = div("nbitem", children = [ficon, label], style = "width:100%;background-color:#1e1e1e;display:inline-flex")
 end
 
 function read_notebook_into_components(notebook_uri::String)
