@@ -19,11 +19,17 @@ function make_nb_directories(c::AbstractConnection, uri::String)
         else
             make_nbitem_folder(c, current_uri, filename)
         end
-    end for filename in readdir(current_uri)]
+    end for filename in readdir(current_uri[begin:end - 1])]
     if uri != "notebooks"
         new_bar = div("returner", text = "...", align = "center")
-        style!(new_bar, "padding" => 3percent, "background-color" => "darkred", "font-weight" => "bold", "color" => "white")
+        style!(new_bar, "padding" => 3percent, "background-color" => "darkred", "font-weight" => "bold", "color" => "white", 
+            "cursor" => "pointer")
         insert!(dirs, 1, new_bar)
+        on(c, new_bar, "click") do cm::ComponentModifier
+            dirsplits = split(uri, "/")
+            uri = join(dirsplits[1:end - 1], "/")
+            set_children!(cm, "directories", make_nb_directories(c, uri))
+        end
     end
     dirs
 end
@@ -57,7 +63,8 @@ function make_nbitem_folder(c::AbstractConnection, current_uri::AbstractString, 
     style!(label, "padding" => 1percent, "cursor" => "pointer", "color" => "white", "background-color" => "#1e1e1e", "font-size" => 18pt, "font-weight" => "bold", 
         "margin-left" => 8px)
     on(c, label, "click") do cm::ComponentModifier
-        set_children!(cm, "directories", make_nb_directories(c, "notebooks/$filename"))
+        uri = replace(current_uri, "public/content/" => "")
+        set_children!(cm, "directories", make_nb_directories(c, uri * filename))
     end
     box = div("nbitem", children = [ficon, label], style = "width:100%;background-color:#1e1e1e;display:inline-flex")
 end
