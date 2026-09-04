@@ -83,7 +83,7 @@ function create_styles()
     stylsheet::Component{:sheet}
 end
 
-SESSION = Session(["/"])
+SESSION = Session(["/", "/blog/search", "/blog/series", "/blog/categories", "/blog/latest", "/blog"])
 include("desktop.jl")
 include("pages/posts.jl")
 include("pages/models.jl")
