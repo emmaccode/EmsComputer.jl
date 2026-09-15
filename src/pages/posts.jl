@@ -36,6 +36,12 @@ end
 posts_main = div("posts-main", align = "left")
 style!(posts_main, "padding" => 50px, "overflow-x" => "show", "overflow-y" => "scroll", "height" => 100percent)
 
+more_posts_blog_link = section("bloglnk", class = "postbody", children = [
+    h2(text = "Looking for more posts?"),
+    h4(text = "click here to visit the blog!")
+], onclick = "'window.location.href = \"/blog\"'")
+push!(posts_main, more_posts_blog_link)
+
 function build_post_preview(post::Post)
     childs = build_post_header_inner(post)
     sect = section(gen_ref(), children = childs, class = "postbody")
