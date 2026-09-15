@@ -52,7 +52,8 @@ post_route = route("/blog/post") do c::AbstractConnection
     end
     requested_post = replace(args[:postname], "_" => " ", "%" => ":", "||" => "_") * ".md"
     selected_post = Post("public/content/posts/" * requested_post)
-    mainbod = build_post_body(selected_post)
+    mainbod = build_post_full(selected_post)
+    style!(mainbod, "padding" => 5percent)
     bod = body("mainbody", children = [build_blog_bar(c), mainbod], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
@@ -67,6 +68,7 @@ latest_route = route("/blog/latest") do c::AbstractConnection
     end
     previews = build_post_previews(c::AbstractConnection, 1:10)
     latest_sect = section("latestsect", children = previews)
+    style!(latest_sect, "padding" => 2percent)
     bod = body("mainbody", children = [build_blog_bar(c, "latestmen"), latest_sect], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
