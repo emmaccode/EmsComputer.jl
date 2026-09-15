@@ -44,8 +44,16 @@ function make_nbitem_file(c::AbstractConnection, current_uri::AbstractString, fi
         logobg = div("logobg", align = "center", children = [header, loading_header])
         set_children!(cm, "directories", [logobg])
         cm["emseyes"] = "src" => "/images/animated.gif"
+        backb = div("backb", text = "back", align = "center")
+        style!(backb, "top" => 0percent, "height" => 2percent, "font-weight" => "bold", "color" => "white", "background-color" => "darkred",
+            "position" => "absolute", "width" => 100percent, "left" => 0percent, "cursor" => "pointer")
+        on(c, backb, "click") do cm::ComponentModifier
+            dirs = make_nb_directories(c, "notebooks")
+            set_children!(cm, "directories", dirs)
+        end
         on(c, cm, 5) do cm::ComponentModifier
             nb_comps = read_notebook_into_components(current_uri * filename)
+            push!(nb_comps, backb)
             set_children!(cm, "directories", nb_comps)
         end
     end
