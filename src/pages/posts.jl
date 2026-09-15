@@ -36,37 +36,48 @@ end
 posts_main = div("posts-main", align = "left")
 style!(posts_main, "padding" => 50px, "overflow-x" => "show", "overflow-y" => "scroll", "height" => 100percent)
 
+more_posts_blog_link = section("bloglnk", class = "postbody", children = [
+    h2(text = "Looking for more posts?"),
+    h4(text = "click here to visit the blog!")
+], onclick = "'window.location.href = \"/blog\"'")
+push!(posts_main, more_posts_blog_link)
+
 function build_post_preview(post::Post)
-    postname = replace(post.title, " " => "_", "'" => "")
-    childs = [h3(text = post.title),
-    h4(text = post.sub)]
-    if post.img != ""
-        insert!(childs, 1, img("-", src = post.img, width = 300))
-    end
-    sect = section("$postname", children = childs, class = "postbody")
+    childs = build_post_header_inner(post)
+    sect = section(gen_ref(), children = childs, class = "postbody")
     sect
+end
+
+function create_popup(post::Post)
+    post_main = build_post_full(post)
+    closebutton = button("closeb", text = "close", align = "center")
+    on(closebutton, "click") do cl::ClientModifier
+        remove!(cl, "postbody")
+    end
+    style!(closebutton, "background-color" => "#911048", "color" => "white", "width" => 94percent, 
+        "margin-bottom" => 100px)
+    post_body = div("postbody", children = Vector{AbstractComponent}([closebutton]))
+    style!(post_body, "width" => 94percent, "height" => 100percent, "z-index" => 15, "padding" => 3percent, 
+    "background-color" => "#513154", "position" => "absolute", "left" => 0px, "top" => 0px)
+    push!(post_body, post_main)
+    post_body::AbstractComponent
 end
 
 function attach_popup_action!(c::AbstractConnection, post::Post, comp::AbstractComponent)
     on(c, comp, "click") do cm::ComponentModifier
-        post_main = build_post_body(post)
-        closebutton = button("closeb", text = "close", align = "center")
-        on(closebutton, "click") do cl::ClientModifier
-            remove!(cl, "postbody")
-        end
-        style!(closebutton, "background-color" => "#911048", "color" => "white", "width" => 94percent, 
-            "margin-bottom" => 100px)
-        post_body = div("postbody", children = Vector{AbstractComponent}([closebutton]))
-        style!(post_body, "width" => 94percent, "height" => 100percent, "z-index" => 15, "padding" => 3percent, 
-        "background-color" => "#513154", "position" => "absolute", "left" => 0px, "top" => 0px)
-        if length(childs) == 3
-            push!(post_body, childs[2:3] ..., childs[1])
-        else
-            push!(post_body, childs ...)
-        end
-        push!(post_body, post_main)
+        post_body = create_popup(post)
         append!(cm, "mainbody", post_body)
     end
+    nothing::Nothing
+end
+
+function attach_popup_action!(post::Post, comp::AbstractComponent)
+    ref = ToolipsSession.gen_ref()
+    on(SESSION, ref) do cm::ComponentModifier
+        popup = create_popup(post)
+        append!(cm, "mainbody", popup)
+    end
+    on(ref, comp, "click")
     nothing::Nothing
 end
 
@@ -77,7 +88,7 @@ function attach_redirect_action!(c::AbstractConnection, post::Post, comp::Abstra
     nothing::Nothing
 end
 
-function build_post_body(post::Post)
+function get_raw_post(post::Post)
     rawpost = read(post.uri, String)
     found_img = findfirst("```img", rawpost)
     data_end = if ~(isnothing(found_img))
@@ -89,12 +100,54 @@ function build_post_body(post::Post)
         @warn "Error with post $(post.title) -- could not find end to meta-info."
         return
     end
-    post_main = tmd("postmain", rawpost[maximum(data_end) + 1:end])
+    rawpost[maximum(data_end) + 1:end]::String
+end
+
+function build_post_body(post::Post)
+    post_main = tmd("postmain", get_raw_post(post))
     post_main::Component{:div}
 end
 
-function build_collection_preview(series_name)
-    
+function build_post_header_inner(post::Post)
+    postname = replace(post.title, " " => "_", "'" => "")
+    childs = [h3(text = post.title),
+    h4(text = post.sub)]
+    if post.img != ""
+        push!(childs, img("-", src = post.img, width = 300))
+    end
+    if post.series != ""
+        push!(childs, h5(text = post.series))
+    end
+    childs
+end
+
+function build_post_header(post::Post)
+    childs = build_post_header_inner(post)
+    sect = div("$(gen_ref)-header", children = childs)
+    sect
+end
+
+function build_post_full(post::Post)
+    header = build_post_header(post)
+    bod = build_post_body(post)
+    sect = div(gen_ref(), children = [header, bod])
+end
+
+function get_collection_posts(series_name::String)
+    collection_items = Vector{Post}()
+    posts_dir = "public/content/posts/"
+    for post_n in readdir(posts_dir)
+        pst = Post(posts_dir * post_n)
+        if series_name == pst.series
+            push!(collection_items, pst)
+        end
+    end
+    collection_items::Vector{Post}
+end
+
+function build_collection_preview(series_name::String)
+    items = get_collection_posts(series_name)
+
 end
 
 function load_posts_by_recent()
@@ -102,7 +155,7 @@ function load_posts_by_recent()
     sort!(
         posts;
         by = mtime,
-        rev = true
+        rev = false
     )
     posts
 end
@@ -117,7 +170,9 @@ function load_posts()
     end
     for post_dir in reverse(posts)[1:nposts]
         psh::Post = Post("public/content/posts/" * post_dir)
-        push!(posts_main, build_post_preview(psh))
+        preview = build_post_preview(psh)
+        attach_popup_action!(psh, preview)
+        push!(posts_main, preview)
     end
 end
 

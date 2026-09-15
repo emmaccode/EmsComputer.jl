@@ -32,19 +32,85 @@ function build_blog_bar(c::AbstractConnection, men_selected::String = "")
     container::Component{:div}
 end
 
+
+function fisher_yates_shuffle(v)
+    v2 = copy(v)
+    for i in length(v2):-1:2
+        j = rand(1:i)
+        v2[i], v2[j] = v2[j], v2[i]
+    end
+    return v2
+end
+
+function build_random_post_previews(c::AbstractConnection, count::Int = 5)
+    posts = load_posts_by_recent()
+    if isempty(posts)
+        return []
+    end
+    # pick random unique posts
+    count = min(count, length(posts))
+    slice = fisher_yates_shuffle(posts)[1:count]
+    [begin
+        post = Post("public/content/posts/" * post_dir)
+        preview = build_post_preview(post)
+        attach_redirect_action!(c, post, preview)
+        preview
+    end for post_dir in slice]
+end
+
+
 blog_menubutton_class = style("a.blogmenubutton", "border-left" => "4px solid #8833b0", "border-top-right-radius" => 6pt,
     "cursor" => "pointer", "padding" => .5percent, "color" => "#d4cfb0", "font-size" => 20pt, "padding-left" => 1.5percent, "padding-right" => 1.5percent, 
     "transition" => 400ms)
 blog_menubutton_class:"hover":["background-color" => "#0a0a0a", "color" => "#854a96", "border-bottom" => "4px solid #854a96", "font-weight" => "bold"]
 
+
 blog_route = route("/blog") do c::AbstractConnection
-    write!(c, blog_menubutton_class)
-    bod = body("mainbody", children = [build_blog_bar(c, "homemen")], style = "background-color:#1a1818;color:white;padding:0%;")
+    write!(c, blog_menubutton_class, create_styles())
+    random_previews = build_random_post_previews(c, 5)
+    left_box = section("randombox", children = random_previews)
+    style!(left_box,
+        "width" => 50percent,
+        "display" => "inline-block",
+        "vertical-align" => "top",
+        "padding" => 2percent
+    )
+    series_placeholder = div("seriesbox", text = "Series go here")
+    style!(series_placeholder,
+        "width" => 50percent,
+        "display" => "inline-block",
+        "vertical-align" => "top",
+        "padding" => 2percent,
+        "color" => "white",
+        "background-color" => "#252525",
+        "font-size" => 18pt,
+        "font-weight" => "bold",
+        "text-align" => "center"
+    )
+    split_panel = div("splitpanel", children = [left_box, series_placeholder])
+    style!(split_panel,
+        "display" => "flex",
+        "flex-direction" => "row",
+        "width" => 100percent,
+        "background-color" => "#1e1e1e"
+    )
+    latest_previews = build_post_previews(c, 1:10)
+    latest_sect = section("latestsect", children = latest_previews)
+    style!(latest_sect, "padding" => 2percent)
+    bod = body("mainbody",
+        children = [
+            build_blog_bar(c, "homemen"),
+            split_panel,
+            latest_sect
+        ],
+        style = "background-color:#1a1818;color:white;padding:0%;"
+    )
+
     write!(c, bod)
 end
 
 post_route = route("/blog/post") do c::AbstractConnection
-    write!(c, blog_menubutton_class)
+    write!(c, blog_menubutton_class, create_styles())
     args = get_args(c)
     if ~(haskey(args, :postname))
         write!(c, "no post selected (temp message)")
@@ -52,33 +118,37 @@ post_route = route("/blog/post") do c::AbstractConnection
     end
     requested_post = replace(args[:postname], "_" => " ", "%" => ":", "||" => "_") * ".md"
     selected_post = Post("public/content/posts/" * requested_post)
-    mainbod = build_post_body(selected_post)
+    mainbod = build_post_full(selected_post)
+    style!(mainbod, "padding" => 5percent)
     bod = body("mainbody", children = [build_blog_bar(c), mainbod], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
 
 latest_route = route("/blog/latest") do c::AbstractConnection
-    write!(c, blog_menubutton_class)
-    load_more = div("loadm", text = "load more", align = "center")
-    style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
-        "font-weight" => "bold", "font-size" => 16pt)
-    on(c, load_more, "click") do cm::ComponentModifier
-
-    end
+    write!(c, blog_menubutton_class, create_styles())
     previews = build_post_previews(c::AbstractConnection, 1:10)
+    if length(previews) == 10
+        load_more = div("loadm", text = "load more", align = "center")
+        style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
+        "font-weight" => "bold", "font-size" => 16pt)
+        on(c, load_more, "click") do cm::ComponentModifier
+
+        end
+    end
     latest_sect = section("latestsect", children = previews)
+    style!(latest_sect, "padding" => 2percent)
     bod = body("mainbody", children = [build_blog_bar(c, "latestmen"), latest_sect], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
 
 cats_route = route("/blog/categories") do c::AbstractConnection
-    write!(c, blog_menubutton_class)
+    write!(c, blog_menubutton_class, create_styles())
     bod = body("mainbody", children = [build_blog_bar(c, "catmen")], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
 
 series_route = route("/blog/series") do c::AbstractConnection
-    write!(c, blog_menubutton_class)
+    write!(c, blog_menubutton_class, create_styles())
     bod = body("mainbody", children = [build_blog_bar(c, "sermen")], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
@@ -102,7 +172,7 @@ function get_postsearch_results(query::String)
 end
 
 search_route = route("/blog/search") do c::AbstractConnection
-    write!(c, blog_menubutton_class)
+    write!(c, blog_menubutton_class, create_styles())
     args = get_args(c)
     searchbody = if haskey(args, :q)
         childs = [begin 

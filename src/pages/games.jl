@@ -1,5 +1,5 @@
-function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:music})
-    menu = make_base_windowmenu(c, app, MUSIC_MAIN)
-    style!(menu, "overflow-x" => "hidden", "overflow-y" => "scroll")
-    return(menu)
+function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:games})
+    main = div("-", align = "center", children = [h2(text = "no games available.... yet")])
+    style!(main, "padding-top" => 20percent)
+    menu = make_base_windowmenu(c, app, main)
 end

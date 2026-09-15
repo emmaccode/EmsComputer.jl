@@ -54,7 +54,7 @@ APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"
    # ColorPagesApp{:files}("files", "/images/page-icons/files.png", "#301934"), 
     ColorPagesApp{:music}("music", "/images/page-icons/music.png", "#B33951"), 
    # ColorPagesApp{:cad}("cad", "/images/page-icons/cad.png", "#dddddd"), 
-     
+     ColorPagesApp{:links}("links", "/images/page-icons/files.png", "#FFB269"),
     ColorPagesApp{:notebooks}("notebooks", "/images/page-icons/notebooks.png", "#FFB269"),]
     
 #   ColorPagesApp{:photos}("photos", "/images/page-icons/photos.png", "#ffffff")]
