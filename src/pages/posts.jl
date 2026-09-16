@@ -23,7 +23,7 @@ mutable struct Post <: Servable
         metainfo = TOML.parse(p[metar])
         ID = ToolipsSession.gen_ref(16)
         (series, series_n) = if haskey(metainfo, "series")
-            (metainfo["series"], parse(Int64, metainfo["series_n"]))
+            (metainfo["series"], metainfo["series_n"])
         else
             ("", 0)
         end
@@ -110,14 +110,16 @@ end
 
 function build_post_header_inner(post::Post)
     postname = replace(post.title, " " => "_", "'" => "")
-    childs = [h3(text = post.title),
-    h4(text = post.sub)]
+    childs = Vector{AbstractComponent}()
+    if post.series != ""
+        push!(childs, h4(text = string(post.series_n), align = "right"),
+        h5(text = post.series, align = "right"))
+    end
     if post.img != ""
         push!(childs, img("-", src = post.img, width = 300))
     end
-    if post.series != ""
-        push!(childs, h5(text = post.series))
-    end
+    push!(childs, h3(text = post.title),
+        h4(text = post.sub))
     childs
 end
 
@@ -150,13 +152,15 @@ function build_collection_preview(series_name::String)
 
 end
 
-function load_posts_by_recent()
+function load_posts_by_recent(sort::Bool = true)
     posts = readdir("public/content/posts")
-    sort!(
+    if sort
+        sort!(
         posts;
-        by = mtime,
-        rev = false
-    )
+        by = p -> stat(joinpath("public/content/posts", p)).mtime,
+        rev = true
+        )
+    end
     posts
 end
 

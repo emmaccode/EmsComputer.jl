@@ -180,6 +180,8 @@ end
 function on_start(ext::Toolips.QuickExtension{:clients}, data::Dict{Symbol, Any}, 
     routes::Vector{<:AbstractRoute})
     load_posts()
+    load_series()
+    register_all_post_tags()
     push!(data, :clients => Vector{ClientComputer}())
 end
 

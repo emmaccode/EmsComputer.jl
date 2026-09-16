@@ -79,7 +79,11 @@ function create_styles()
     post_body = style("section.postbody", "background-color" => "#3F3A42", "border" => "3px solid black",
     "border-radius" => 4px, "padding" => 2.5percent, "margin" => .5percent, "cursor" => "pointer", "transition" => 200ms)
     post_body:"hover":["transform" => scale(1.05)]
-    push!(stylsheet, button_style, h1_sty, h2_sty, h3_sty, h4_sty, p_sty, post_body)
+    category_button = style("button.categoryb", "background" => "transparent", 
+        "border-radius" => 5pt, "border" => "3px solid white", "color" => "white", 
+        "font-weight" => "bold", "margin" => 3px, "transition" => 300ms)
+    category_button:"hover":["border" => "3px solid #be60d1", "color" => "#be60d1"]
+    push!(stylsheet, button_style, h1_sty, h2_sty, h3_sty, h4_sty, p_sty, post_body, category_button)
     stylsheet::Component{:sheet}
 end
 
