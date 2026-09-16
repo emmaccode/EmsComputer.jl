@@ -97,7 +97,7 @@ function build_random_post_previews(c::AbstractConnection, count::Int = 5)
     [begin
         post = Post("public/content/posts/" * post_dir)
         preview = build_post_preview(post)
-        attach_redirect_action!(c, post, preview)
+        attach_redirect_action!(post, preview)
         preview
     end for post_dir in slice]
 end
@@ -172,7 +172,7 @@ end
 
 latest_route = route("/blog/latest") do c::AbstractConnection
     write!(c, blog_menubutton_class, create_styles())
-    previews = build_post_previews(c::AbstractConnection, 1:10)
+    previews = build_post_previews(c, 1:10)
     if length(previews) == 10
         load_more = div("loadm", text = "load more", align = "center")
         style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
@@ -202,11 +202,17 @@ cats_route = route("/blog/categories") do c::AbstractConnection
                 style!(cm, tag_button, "background" => "transparent")
             end
             # now update post list
+            posts = load_posts_by_category(selected_categories)
+            if length(posts) < 1
+                set_children!(cm, "catposts", [h2(text = "no categories selected", align = "center")])
+            else
+                set_children!(cm, "catposts", build_post_previews(posts))
+            end
         end
         tag_button
     end for tag in ALL_POST_TAGS]
     cats_main = div("catsmain", children = buttons)
-    posts_box = div("catposts")
+    posts_box = div("catposts", children = h2(text = "no categories selected", align = "center"))
     wrapper = div("-", children = [cats_main, posts_box])
     style!(wrapper, "padding" => 3percent)
     bod = body("mainbody", children = [build_blog_bar(c, "catmen"), wrapper], style = "background-color:#1a1818;color:white;padding:0%;")
@@ -222,7 +228,7 @@ series_route = route("/blog/series") do c::AbstractConnection
         posts = load_post_series(selected_series)
         push!(bod, div("-", children = [begin
             prev = build_post_preview(post)
-            attach_redirect_action!(c, post, prev)
+            attach_redirect_action!(post, prev)
             prev
         end for post in posts]))
     else

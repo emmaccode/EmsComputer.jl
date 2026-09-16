@@ -81,7 +81,7 @@ function attach_popup_action!(post::Post, comp::AbstractComponent)
     nothing::Nothing
 end
 
-function attach_redirect_action!(c::AbstractConnection, post::Post, comp::AbstractComponent)
+function attach_redirect_action!(post::Post, comp::AbstractComponent)
     postfname = split(post.uri, "/")[end]
     postfname = replace(postfname, ".md" => "", " " => "_", ":" => "%", "_" => "||")
     comp[:onclick] = "'window.location.href = \"/blog/post?postname=$postfname\";'"
@@ -147,19 +147,39 @@ function get_collection_posts(series_name::String)
     collection_items::Vector{Post}
 end
 
-function build_collection_preview(series_name::String)
-    items = get_collection_posts(series_name)
-
+function load_posts_by_category(categories::Vector{String})
+    posts = load_posts_by_recent(false)
+    posts_in_category::Vector{Post} = Vector{Post}()
+    stub = "public/content/posts/"
+    for posturi in posts
+        post = Post(stub * posturi)
+        if any(tag -> tag in categories, post.tags)
+            push!(posts_in_category, post)
+        end
+    end
+    posts_in_category
 end
 
-function load_posts_by_recent(sort::Bool = true)
+function load_posts_by_recent(sort::Bool = true, range::UnitRange{Int64} = -15:-15)
     posts = readdir("public/content/posts")
+
     if sort
         sort!(
         posts;
         by = p -> stat(joinpath("public/content/posts", p)).mtime,
         rev = true
         )
+    end
+    if range != -15:-15
+        n = length(posts)
+        if maximum(range) > n
+            start = minimum(range)
+            if start > n
+                return(nothing)
+            end
+            range = start:n
+        end
+        posts = posts[range]
     end
     posts
 end
@@ -180,18 +200,27 @@ function load_posts()
     end
 end
 
-function build_post_previews(c::AbstractConnection, range::UnitRange{Int64} = 1:5)
-    posts = load_posts_by_recent()
-    if length(posts) < maximum(range)
-        range = 1:length(posts)
-    end
-    slice = @views posts[range]
+function build_post_previews(posts::Vector{String})
     [begin
         post = Post("public/content/posts/" * post_dir)
         preview = build_post_preview(post)
-        attach_redirect_action!(c, post, preview)
+        attach_redirect_action!(post, preview)
         preview
-    end for post_dir in slice]
+    end for post_dir in posts]
+end
+
+function build_post_previews(posts::Vector{Post})
+    [begin
+        preview = build_post_preview(post)
+        attach_redirect_action!(post, preview)
+        preview
+    end for post in posts]
+end
+
+
+function build_post_previews(c::AbstractConnection, range::UnitRange{Int64} = 1:5)
+    posts = load_posts_by_recent(true, range)
+    build_post_previews(posts)::Vector{<:AbstractComponent}
 end
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:posts})
