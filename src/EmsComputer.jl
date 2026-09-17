@@ -77,7 +77,8 @@ function create_styles()
     h4_sty = style("h4", "color" => "white", "font-size" => 15pt)
     p_sty = style("p", "color" => "white", "font-size" => 14pt)
     post_body = style("section.postbody", "background-color" => "#3F3A42", "border" => "3px solid black",
-    "border-radius" => 4px, "padding" => 2.5percent, "margin" => .5percent, "cursor" => "pointer", "transition" => 200ms)
+        "border-radius" => 4px, "padding" => 2.5percent, "margin" => .5percent, "cursor" => "pointer", "transition" => 200ms, 
+        "user-select" => "none")
     post_body:"hover":["transform" => scale(1.05)]
     category_button = style("button.categoryb", "background" => "transparent", 
         "border-radius" => 5pt, "border" => "3px solid white", "color" => "white", 
@@ -99,6 +100,7 @@ include("pages/music.jl")
 include("pages/notebooks.jl")
 include("pages/software_pages.jl")
 include("pages/blog.jl")
+include("pages/links.jl")
 
 fourofour = route("404") do c
     header = build_logo_header()

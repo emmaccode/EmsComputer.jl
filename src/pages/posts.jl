@@ -150,10 +150,13 @@ end
 function load_posts_by_category(categories::Vector{String})
     posts = load_posts_by_recent(false)
     posts_in_category::Vector{Post} = Vector{Post}()
+    if length(categories) == 0
+        return(posts_in_category)
+    end
     stub = "public/content/posts/"
     for posturi in posts
         post = Post(stub * posturi)
-        if any(tag -> tag in categories, post.tags)
+        if all(tag -> tag in post.tags, categories)
             push!(posts_in_category, post)
         end
     end

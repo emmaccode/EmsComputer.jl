@@ -86,7 +86,7 @@ function make_series_preview(series_name::Pair{String, String})
     series_box::Component{:section}
 end
 
-function build_random_post_previews(c::AbstractConnection, count::Int = 5)
+function build_random_post_previews(c::AbstractConnection, count::Int = 3)
     posts = load_posts_by_recent()
     if isempty(posts)
         return []
@@ -204,7 +204,7 @@ cats_route = route("/blog/categories") do c::AbstractConnection
             # now update post list
             posts = load_posts_by_category(selected_categories)
             if length(posts) < 1
-                set_children!(cm, "catposts", [h2(text = "no categories selected", align = "center")])
+                set_children!(cm, "catposts", [h2(text = "no matches in these categories", align = "center")])
             else
                 set_children!(cm, "catposts", build_post_previews(posts))
             end
