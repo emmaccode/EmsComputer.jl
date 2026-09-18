@@ -223,6 +223,9 @@ end
 
 function build_post_previews(c::AbstractConnection, range::UnitRange{Int64} = 1:5)
     posts = load_posts_by_recent(true, range)
+    if isnothing(posts)
+        return(Vector{AbstractComponent}())
+    end
     build_post_previews(posts)::Vector{<:AbstractComponent}
 end
 

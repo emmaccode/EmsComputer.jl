@@ -111,7 +111,7 @@ blog_menubutton_class:"hover":["background-color" => "#0a0a0a", "color" => "#854
 
 blog_route = route("/blog") do c::AbstractConnection
     write!(c, blog_menubutton_class, create_styles())
-    random_previews = build_random_post_previews(c, 5)
+    random_previews = build_random_post_previews(c, 3)
     left_box = section("randombox", children = random_previews)
     style!(left_box,
         "width" => 50percent,
@@ -140,7 +140,7 @@ blog_route = route("/blog") do c::AbstractConnection
         "width" => 100percent,
         "background-color" => "#1e1e1e"
     )
-    latest_previews = build_post_previews(c, 1:10)
+    latest_previews = build_post_previews(c, 1:5)
     latest_sect = section("latestsect", children = latest_previews)
     style!(latest_sect, "padding" => 2percent)
     bod = body("mainbody",
@@ -170,18 +170,31 @@ post_route = route("/blog/post") do c::AbstractConnection
     write!(c, bod)
 end
 
-latest_route = route("/blog/latest") do c::AbstractConnection
-    write!(c, blog_menubutton_class, create_styles())
-    previews = build_post_previews(c, 1:10)
-    if length(previews) == 10
-        load_more = div("loadm", text = "load more", align = "center")
-        style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
-        "font-weight" => "bold", "font-size" => 16pt)
-        on(c, load_more, "click") do cm::ComponentModifier
-
+function make_loadmore_button(c::Toolips.AbstractConnection, current_r::UnitRange{Int64})
+    load_more = div("loadm", text = "load more", align = "center")
+    style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
+    "font-weight" => "bold", "font-size" => 16pt)
+    on(c, load_more, "click") do cm::ComponentModifier
+        previews = build_post_previews(c, current_r)
+        remove!(cm, "loadm")
+        for preview in previews
+            append!(cm, "latestsect", preview)
+        end
+        if ~(length(previews) < maximum(current_r) - minimum(current_r))
+            append!(cm, "latestsect", make_loadmore_button(c, minimum(current_r) + 5:maximum(current_r) + 5))
         end
     end
+    load_more::Component{:div}
+end
+
+latest_route = route("/blog/latest") do c::AbstractConnection
+    write!(c, blog_menubutton_class, create_styles())
+    previews = Vector{AbstractComponent}(build_post_previews(c, 1:5))
     latest_sect = section("latestsect", children = previews)
+    if length(previews) == 5
+        load_more = make_loadmore_button(c, 6:10)
+        push!(previews, load_more)
+    end
     style!(latest_sect, "padding" => 2percent)
     bod = body("mainbody", children = [build_blog_bar(c, "latestmen"), latest_sect], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
