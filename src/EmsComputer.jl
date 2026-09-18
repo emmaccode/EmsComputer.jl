@@ -84,7 +84,11 @@ function create_styles()
         "border-radius" => 5pt, "border" => "3px solid white", "color" => "white", 
         "font-weight" => "bold", "margin" => 3px, "transition" => 300ms)
     category_button:"hover":["border" => "3px solid #be60d1", "color" => "#be60d1"]
-    push!(stylsheet, button_style, h1_sty, h2_sty, h3_sty, h4_sty, p_sty, post_body, category_button)
+    fadeup_anim = keyframes("fadeup")
+    keyframes!(fadeup_anim, from, "opacity" => 0percent, "transform" => "translateY(20%)")
+    keyframes!(fadeup_anim, to, "opacity" => 100percent, "transform" => "translateY(0%)")
+    push!(stylsheet, button_style, h1_sty, h2_sty, h3_sty, h4_sty, p_sty, post_body, category_button,
+        fadeup_anim)
     stylsheet::Component{:sheet}
 end
 
