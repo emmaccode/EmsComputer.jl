@@ -1,15 +1,21 @@
 module EmsComputer
-import Base: getindex
+import Base: getindex, in
 using Toolips
 import Toolips: on_start, gen_ref
 using Toolips.Components
 using ToolipsSession
+using ToolipsSession: get_session_key
 using JSON
 using TOML
 using OliveHighlighters
 using IPyCells
 using IPyCells: Cell
+using ParametricScheduler
 ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
+
+function start(ip::IP4)
+    start!(EmsComputer, ip, pman_type = ParametricScheduler.Scheduler)
+end
 
 function text_styles()
     heading1_style = Style("h1")
