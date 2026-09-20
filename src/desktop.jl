@@ -139,14 +139,27 @@ function load_session_from_splash(c::AbstractConnection, cm::ComponentModifier, 
     ==#
 end
 
-function build_splash_alpha()
-
+function build_splash_alpha(c::AbstractConnection)
+    notifier = h3(text = "welcome!")
+    info_p = p(text = """This is an alpha release of EmsComputer, 
+    some aspects of this project may be broken or incomplete.""")
+    skipbutton = button("skipbutton", text = "enter em's computer", align = "center")
+    on(c, skipbutton, "click") do cm::ComponentModifier
+        load_session_from_splash(c, cm)
+    end
+    alpha_page = div("overbox", children = [notifier, info_p, skipbutton])
+    main::Component{:div} = div("maindiv", align = "left", children = [alpha_page])
+    style!(main, "background-color" => "#36454F", "margin-top" => 2percent,
+        "width" => 20percent, "left" => 35percent, "position" => "absolute",
+        "opacity" => 0percent, "transition" => 1seconds, "height" => 0percent,
+        "overflow" => "visible", "padding" => 15px, "border-radius" => 3px, "border" => "2px solid #0f0e0f")
+    main::Component{:div}
 end
 
 function build_splash(c::AbstractConnection)
     write_style_defaults!(c)
     logobg::Component{:div} = build_logo_header()
-    main = build_splash_login(c)
+    main = build_splash_alpha(c)
     emsfooter = build_splash_footer(c)
     main_body::Component{:body} = Component{:body}("mainbody", children = [logobg, main, emsfooter])
     style!(main_body, "background-color" => "#D6CBDA", "overflow" => "hidden",
@@ -169,8 +182,30 @@ function build_splash_footer(c::AbstractConnection)
         redirect!(cl, "https://github.com/emmaccode/EmsComputer.jl")
     end
     license_button = button("licenselink", text = "licensing")
-    about_button = button("buttonlink", text = "about")
-    emsfooter = div("emsfooter", align = "center", children = [source_button, license_button, about_button])
+    on(c, license_button, "click") do cm::ComponentModifier
+        if "licensepopup" in cm
+            return
+        end
+        overview_p = p(text = """Everything available on EmsComputer is distributed with 
+            permissive licensing. Software is licensed using the MIT-0 license, which means 
+            it is entirely free to reproduce, edit, distribute, or otherwise. Content is 
+            licensed with a CCBY license, which means that content is free to use with credit provided.""")
+        mit_button = button(text = "view MIT license", onclick = "'window.location.href = \"/licensing/MIT-0.md\"'")
+        ccby_button = button(text = "view creative commons license", onclick = "'window.location.href = \"/licensing/CCBY.md\"'")
+        close_button = button("closer", text = "close")
+        license_popup = div("licensepopup", children = [close_button, overview_p, mit_button, ccby_button])
+        on(close_button, "click") do cl::ClientModifier
+            remove!(cl, license_popup)
+        end
+        style!(license_popup, "position" => "absolute", "left" => 30.5percent, "width" => 35percent, "padding" => 2percent, 
+            "background-color" => "#212222")
+        append!(cm, "mainbody", license_popup)
+    end
+    blog_button = button("buttonlink", text = "blog")
+    on(blog_button, "click") do cl::ClientModifier
+        redirect!(cl, "/blog")
+    end
+    emsfooter = div("emsfooter", align = "center", children = [source_button, blog_button, license_button])
     style!(emsfooter, "background" => "transparent",
      "margin-top" => 40percent, "opacity" => 0percent,
     "transition" => 700ms, "width" => 30percent, "position" => "absolute", "left" => 0percent)
@@ -299,8 +334,9 @@ computer_main = route("/") do c::AbstractConnection
     write!(c, link("-", href = "/favicon.png", rel = "icon", type = "image/png"))
     session_key = get_session_key(c)
     cooks = get_cookies(c)
+    session_override = haskey(get_args(c), :override)
     found = findfirst(cook -> cook.name == "emvisit", cooks)
-    if ~(isnothing(found))
+    if ~(isnothing(found)) && ~(session_override)
         computer = if session_key in c[:clients] 
             computer = c[:clients][session_key]
         else
