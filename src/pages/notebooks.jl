@@ -1,6 +1,4 @@
-JL_highlighter = OliveHighlighters.Highlighter()
 
-OliveHighlighters.style_julia!(JL_highlighter)
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:notebooks})
     build_nbdirectory_container(c, "notebooks")

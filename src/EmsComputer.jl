@@ -13,6 +13,10 @@ using IPyCells: Cell
 using ParametricScheduler
 ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
 
+JL_highlighter = OliveHighlighters.Highlighter()
+
+OliveHighlighters.style_julia!(JL_highlighter)
+style!(JL_highlighter, :op, ["color" => "white"])
 function start(ip::IP4)
     start!(EmsComputer, ip, pman_type = ParametricScheduler.Scheduler)
 end
