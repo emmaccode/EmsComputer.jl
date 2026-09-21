@@ -1,23 +1,3 @@
-USER_IDS::Dict{String, String} = Dict{String, String}()
-
-function generate_user_id()
-    user_id = Components.gen_ref(8)
-    if user_id in values(USER_IDS)
-        generate_user_id()
-    end
-    user_id::String
-end
-
-function get_client_id(c::AbstractConnection)
-    ip::String = get_ip(c)
-    if haskey(USER_IDS, ip)
-        return(USER_IDS[ip])
-    else
-        @warn "this should never happen..."
-        throw(KeyError(ip))
-    end
-end
-
 mutable struct ClientComputer{logged <: Any}
     windows::Vector{String}
     open_window::UInt8
@@ -35,6 +15,11 @@ function getindex(vec::Vector{ClientComputer}, id::String)
         throw(KeyError(id))
     end
     vec[found]::ClientComputer
+end
+
+function in(id::AbstractString, vec::Vector{ClientComputer})
+    found = findfirst(client::ClientComputer -> client.userid == id, vec)
+    ~(isnothing(found))
 end
 
 LOGO_URI::String = "/images/animated.gif"
@@ -61,9 +46,8 @@ APPS = [ColorPagesApp{:posts}("posts", "/images/page-icons/posts.png", "#1e1e1e"
 #   ColorPagesApp{:graphics}("graphics", "/images/page-icons/photos.png", "#ffffff")]
 
 function authenticate_client!(c::AbstractConnection, username::String = "GUEST")
-    new_id::String = generate_user_id()
-    push!(USER_IDS, get_ip(c) => new_id)
-    push!(c[:clients], ClientComputer(userid, username))
+    new_id::String = ToolipsSession.get_session_key(c)
+    push!(c[:clients], ClientComputer(new_id, username))
     userid::String
 end
 
@@ -80,9 +64,7 @@ function build_logo_header()
     logobg::Component{:div}
 end
 
-function build_splash(c::AbstractConnection)
-    write_style_defaults!(c)
-    logobg::Component{:div} = build_logo_header()
+function build_splash_login(c::AbstractConnection)
     unamebox::Component{:div} = Components.textdiv("unamebox", text = "")
     style!(unamebox, "background-color" => "white", "padding" => 6px, "color" => "#1e1e1e", 
     "border-radius" => 2px)
@@ -112,26 +94,7 @@ function build_splash(c::AbstractConnection)
     style!(pwdlabel, "color" => "white", "font-size" => 13pt, "margin-bottom" => 2px)
     skipbutton = button("skipbutton", text = "skip")
     on(c, skipbutton, "click") do cm::ComponentModifier
-        new_user_id = generate_user_id()
-        push!(USER_IDS, get_ip(c) => new_user_id)
-        push!(c[:clients], ClientComputer(new_user_id))
-        style!(cm, "maindiv", "height" => 0percent, "opacity" => 0percent)
-        style!(cm, "overbox", "opacity" => 0percent)
-        style!(cm, "mainbody", "background-color" => "#36454F")
-        style!(cm, "emsfooter", "top" => 100percent, "opacity" => 0percent)
-        cm["emseyes"] = "src" => "/images/animated.gif"
-        style!(cm, "logobg", "opacity" => 0percent, "transform" => translateX(-10percent), "transtion" => 2seconds)
-        next!(c, cm, "logobg") do cm2::ComponentModifier
-            remove!(cm2, "emsfooter")
-            remove!(cm2, "maindiv")
-            remove!(cm2, "logobg")
-            computer = build_computer(c, c[:clients][new_user_id])
-            style!(computer, "opacity" => 0percent, "transition" => 500ms)
-            append!(cm2, "mainbody", computer)
-            on(cm2, 300) do cl
-                style!(cl, "computer-main", "opacity" => 100percent)
-            end
-        end
+        load_session_from_splash(c, cm)
     end
     loginbutton = button("loginbutton", text = "login")
     style!(loginbutton, "margin-left" => 3px, "margin-right" => 3px)
@@ -147,6 +110,56 @@ function build_splash(c::AbstractConnection)
         "width" => 20percent, "left" => 35percent, "position" => "absolute",
         "opacity" => 0percent, "transition" => 1seconds, "height" => 0percent,
         "overflow" => "visible", "padding" => 9px, "border-radius" => 3px, "border" => "2px solid #0f0e0f")
+    main
+end
+
+function load_session_from_splash(c::AbstractConnection, cm::ComponentModifier, name::AbstractString = "GUEST")
+    new_user_id = ToolipsSession.get_session_key(c)
+    push!(c[:clients], ClientComputer(new_user_id))
+    push!(c[:logins], new_user_id => name)
+    style!(cm, "maindiv", "height" => 0percent, "opacity" => 0percent)
+    style!(cm, "overbox", "opacity" => 0percent)
+    style!(cm, "mainbody", "background-color" => "#36454F")
+    style!(cm, "emsfooter", "top" => 100percent, "opacity" => 0percent)
+    cm["emseyes"] = "src" => "/images/animated.gif"
+    style!(cm, "logobg", "opacity" => 0percent, "transform" => translateX(-10percent), "transtion" => 2seconds)
+    next!(c, cm, "logobg") do cm2::ComponentModifier
+        remove!(cm2, "emsfooter")
+        remove!(cm2, "maindiv")
+        remove!(cm2, "logobg")
+        redirect!(cm2, "/register")
+    end
+    #==    computer = build_computer(c, c[:clients][new_user_id])
+        style!(computer, "opacity" => 0percent, "transition" => 500ms)
+        append!(cm2, "mainbody", computer)
+        on(cm2, 300) do cl
+            style!(cl, "computer-main", "opacity" => 100percent)
+        end
+    end
+    ==#
+end
+
+function build_splash_alpha(c::AbstractConnection)
+    notifier = h3(text = "welcome!")
+    info_p = p(text = """This is an alpha release of EmsComputer, 
+    some aspects of this project may be broken or incomplete.""")
+    skipbutton = button("skipbutton", text = "enter em's computer", align = "center")
+    on(c, skipbutton, "click") do cm::ComponentModifier
+        load_session_from_splash(c, cm)
+    end
+    alpha_page = div("overbox", children = [notifier, info_p, skipbutton])
+    main::Component{:div} = div("maindiv", align = "left", children = [alpha_page])
+    style!(main, "background-color" => "#36454F", "margin-top" => 2percent,
+        "width" => 20percent, "left" => 35percent, "position" => "absolute",
+        "opacity" => 0percent, "transition" => 1seconds, "height" => 0percent,
+        "overflow" => "visible", "padding" => 15px, "border-radius" => 3px, "border" => "2px solid #0f0e0f")
+    main::Component{:div}
+end
+
+function build_splash(c::AbstractConnection)
+    write_style_defaults!(c)
+    logobg::Component{:div} = build_logo_header()
+    main = build_splash_alpha(c)
     emsfooter = build_splash_footer(c)
     main_body::Component{:body} = Component{:body}("mainbody", children = [logobg, main, emsfooter])
     style!(main_body, "background-color" => "#D6CBDA", "overflow" => "hidden",
@@ -160,7 +173,7 @@ function build_splash(c::AbstractConnection)
             end
         end
     end
-    write!(c, main_body)
+    main_body::Component{:body}
 end
 
 function build_splash_footer(c::AbstractConnection)
@@ -169,18 +182,55 @@ function build_splash_footer(c::AbstractConnection)
         redirect!(cl, "https://github.com/emmaccode/EmsComputer.jl")
     end
     license_button = button("licenselink", text = "licensing")
-    about_button = button("buttonlink", text = "about")
-    emsfooter = div("emsfooter", align = "center", children = [source_button, license_button, about_button])
+    on(c, license_button, "click") do cm::ComponentModifier
+        if "licensepopup" in cm
+            return
+        end
+        overview_p = p(text = """Everything available on EmsComputer is distributed with 
+            permissive licensing. Software is licensed using the MIT-0 license, which means 
+            it is entirely free to reproduce, edit, distribute, or otherwise. Content is 
+            licensed with a CCBY license, which means that content is free to use with credit provided.""")
+        mit_button = button(text = "view MIT license", onclick = "'window.location.href = \"/licensing/MIT-0.md\"'")
+        ccby_button = button(text = "view creative commons license", onclick = "'window.location.href = \"/licensing/CCBY.md\"'")
+        close_button = button("closer", text = "close")
+        license_popup = div("licensepopup", children = [close_button, overview_p, mit_button, ccby_button])
+        on(close_button, "click") do cl::ClientModifier
+            remove!(cl, license_popup)
+        end
+        style!(license_popup, "position" => "absolute", "left" => 30.5percent, "width" => 35percent, "padding" => 2percent, 
+            "background-color" => "#212222")
+        append!(cm, "mainbody", license_popup)
+    end
+    blog_button = button("buttonlink", text = "blog")
+    on(blog_button, "click") do cl::ClientModifier
+        redirect!(cl, "/blog")
+    end
+    emsfooter = div("emsfooter", align = "center", children = [source_button, blog_button, license_button])
     style!(emsfooter, "background" => "transparent",
      "margin-top" => 40percent, "opacity" => 0percent,
     "transition" => 700ms, "width" => 30percent, "position" => "absolute", "left" => 0percent)
     emsfooter::Component{:div}
 end
 
+EMSCOMPUTER_CLIENTS = Vector{ClientComputer}()
+
 function on_start(ext::Toolips.QuickExtension{:clients}, data::Dict{Symbol, Any}, 
     routes::Vector{<:AbstractRoute})
+    sched = Scheduler()
+    push!(data, :sched => sched)
+    clear_time = RecurringTime(now(), Hour(2))
+    task = new_task(clear_clients, clear_time)
+    add_tasks!(sched, task)
+    ParametricScheduler.start(sched)
     load_posts()
-    push!(data, :clients => Vector{ClientComputer}())
+    load_series()
+    register_all_post_tags()
+    push!(data, :clients => EmsComputer.EMSCOMPUTER_CLIENTS)
+    push!(data, :logins => Dict{String, String}())
+end
+
+function clear_clients()
+    EmsComputer.EMSCOMPUTER_CLIENTS = Vector{ClientComputer}()
 end
 
 function build_computer(c::AbstractConnection, computer::ClientComputer)
@@ -249,7 +299,7 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
     on(c, preview, "click") do cm::ComponentModifier
         app_window = make_windowmenu(c, app)
         append!(cm, "computer-main", app_window)
-        computer = c[:clients][get_client_id(c)]
+        computer = c[:clients][get_session_key(c)]
         if computer.open_window != 0
             remove!(cm, APPS[computer.open_window].appname * "-menu")
         end
@@ -267,17 +317,39 @@ function make_app_preview(c::AbstractConnection, app::ColorPagesApp{<:Any})
     style!(preview, "padding" => 5px, "cursor" => "pointer")
     preview
 end
+register = route("/register") do c::AbstractConnection
+    session_key = get_session_key(c)
+    if haskey(c[:logins], session_key)
+        respond!(c, "<script>location.href='/'</script>", 
+            [Toolips.Cookie("emvisit", c[:logins][session_key])])
+        delete!(c[:logins], session_key)
+        return
+    end
+end
 
+
+push!(EmsComputer.ROUTES, register)
 #A63855
 computer_main = route("/") do c::AbstractConnection
     write!(c, link("-", href = "/favicon.png", rel = "icon", type = "image/png"))
-    if haskey(USER_IDS, get_ip(c))
-        computer = c[:clients][get_client_id(c)]
+    session_key = get_session_key(c)
+    cooks = get_cookies(c)
+    session_override = haskey(get_args(c), :override)
+    found = findfirst(cook -> cook.name == "emvisit", cooks)
+    if ~(isnothing(found)) && ~(session_override)
+        computer = if session_key in c[:clients] 
+            computer = c[:clients][session_key]
+        else
+            computer = ClientComputer(session_key, cooks[found].value)
+            push!(c[:clients], computer)
+            computer
+        end
         write_style_defaults!(c)
         mainbod = body("mainbody", children = [build_computer(c, computer)])
         style!(mainbod, "background-color" => "#36454F")
         write!(c, mainbod)
-    else
-        build_splash(c)
+        return
     end
+    splash = build_splash(c)
+    write!(c, splash)
 end

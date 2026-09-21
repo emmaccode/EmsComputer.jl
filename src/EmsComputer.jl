@@ -1,15 +1,25 @@
 module EmsComputer
-import Base: getindex
+import Base: getindex, in
 using Toolips
 import Toolips: on_start, gen_ref
 using Toolips.Components
 using ToolipsSession
+using ToolipsSession: get_session_key
 using JSON
 using TOML
 using OliveHighlighters
 using IPyCells
 using IPyCells: Cell
+using ParametricScheduler
 ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
+
+JL_highlighter = OliveHighlighters.Highlighter()
+
+OliveHighlighters.style_julia!(JL_highlighter)
+style!(JL_highlighter, :op, ["color" => "white"])
+function start(ip::IP4)
+    start!(EmsComputer, ip, pman_type = ParametricScheduler.Scheduler)
+end
 
 function text_styles()
     heading1_style = Style("h1")
@@ -77,9 +87,18 @@ function create_styles()
     h4_sty = style("h4", "color" => "white", "font-size" => 15pt)
     p_sty = style("p", "color" => "white", "font-size" => 14pt)
     post_body = style("section.postbody", "background-color" => "#3F3A42", "border" => "3px solid black",
-    "border-radius" => 4px, "padding" => 2.5percent, "margin" => .5percent, "cursor" => "pointer", "transition" => 200ms)
+        "border-radius" => 4px, "padding" => 2.5percent, "margin" => .5percent, "cursor" => "pointer", "transition" => 200ms, 
+        "user-select" => "none")
     post_body:"hover":["transform" => scale(1.05)]
-    push!(stylsheet, button_style, h1_sty, h2_sty, h3_sty, h4_sty, p_sty, post_body)
+    category_button = style("button.categoryb", "background" => "transparent", 
+        "border-radius" => 5pt, "border" => "3px solid white", "color" => "white", 
+        "font-weight" => "bold", "margin" => 3px, "transition" => 300ms)
+    category_button:"hover":["border" => "3px solid #be60d1", "color" => "#be60d1"]
+    fadeup_anim = keyframes("fadeup")
+    keyframes!(fadeup_anim, from, "opacity" => 0percent, "transform" => "translateY(20%)")
+    keyframes!(fadeup_anim, to, "opacity" => 100percent, "transform" => "translateY(0%)")
+    push!(stylsheet, button_style, h1_sty, h2_sty, h3_sty, h4_sty, p_sty, post_body, category_button,
+        fadeup_anim)
     stylsheet::Component{:sheet}
 end
 
@@ -95,6 +114,7 @@ include("pages/music.jl")
 include("pages/notebooks.jl")
 include("pages/software_pages.jl")
 include("pages/blog.jl")
+include("pages/links.jl")
 
 fourofour = route("404") do c
     header = build_logo_header()

@@ -1,13 +1,18 @@
-function make_model_downloadbox(model_name::String)
-    nameb = div("-", text = model_name, style = "background-color:white;display:inline-flex;width:70%;font-weight:bold;padding:1.5%;")
-    blender_b = div("$model_name-blender", text = "download blender")
-    style!(blender_b, "background-color" => "#ad4d0c", "padding-left" => 20px, "display" => "inline-flex", "color" => "whitesmoke", "font-weight" => "bold",
-        "padding" => 1.5percent)
-    glb_b = div("$model_name-blender", text = "download glb")
+function make_model_downloadbox(model_name::String, blender_exists::Bool = false)
+    nameb = div("-", text = model_name, style = "background-color:white;display:inline-flex;width:30%;font-weight:bold;padding:1.5%;")
+    glb_b = div("$model_name-blender", text = "download glb", 
+        onclick = "'window.location.href = \"/media/models/not_showcase/$(model_name).glb\";'")
     style!(glb_b, "background-color" => "darkblue", "display" => "inline-flex", "color" => "whitesmoke", "font-weight" => "bold", 
-        "padding" => 1.5percent)
-    dl_box = div(model_name, children = [nameb, glb_b, blender_b], align = "left")
-    style!(dl_box, "width" => 100percent, "padding" => 2percent)
+        "padding" => 1.5percent, "cursor" => "pointer", "user-select" => "none")
+    dl_box = div(model_name, children = [nameb, glb_b], align = "left")
+    if blender_exists
+        blender_b = div("$model_name-blender", text = "download blender", 
+            onclick = "'window.location.href = \"/media/models/not_showcase/$(model_name).blend\";'")
+        style!(blender_b, "background-color" => "#ad4d0c", "padding-left" => 20px, "display" => "inline-flex", "color" => "whitesmoke", "font-weight" => "bold",
+            "padding" => 1.5percent, "cursor" => "pointer", "user-select" => "none")
+        push!(dl_box, blender_b)
+    end
+    style!(dl_box, "padding" => 2percent)
     dl_box::Component{:div}
 end
 
@@ -59,9 +64,19 @@ MODELS_MAIN = begin
     end for model_meta in readdir("public/media/models/meta")]
     showcase_container = div("showcase", children = [showcase_heading, model_previews ...], align = "left")
     style!(showcase_container, "border-radius" => 4pt, "padding" => 3percent, "background-color" => "#1f1d29", "display" => "grid")
-    non_showcase = [begin
-        make_model_downloadbox(model_name)
-    end for model_name in readdir("public/media/models/not_showcase")]
+    non_showcase_dirs = readdir("public/media/models/not_showcase")
+    non_showcase = Vector{AbstractComponent}()
+    for model_name in non_showcase_dirs
+        if contains(model_name, ".blend")
+            continue
+        end
+        model_name = replace(model_name, ".glb" => "")
+        blend_exists = false
+        if "$model_name.blend" in non_showcase_dirs
+            blend_exists = true
+        end
+        push!(non_showcase, make_model_downloadbox(model_name, blend_exists))
+    end
     preview_box = div("modelmain", children = AbstractComponent[showcase_container])
     if length(non_showcase) > 0
         push!(preview_box, h2(text = "more models", align = "left"), non_showcase ...)
@@ -69,8 +84,6 @@ MODELS_MAIN = begin
     style!(preview_box, "padding" => 5percent)
     preview_box
 end
-
-
 
 function make_windowmenu(c::AbstractConnection, app::ColorPagesApp{:models})
     menu = make_base_windowmenu(c, app, MODELS_MAIN)

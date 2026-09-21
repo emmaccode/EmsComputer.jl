@@ -3,4 +3,4 @@
   </div>
 
 ###### em's computer
-Hello! You've reached the github README for em's computer -- this is a personal project that I am filling with my content and information. This is still an early development, don't expect a final product for a while, either, as I am primarily focused on the [chifi](https://github.com/ChifiSource) ecosystem.
+Em's computer is Emma's ([emmaccode](https://github.com/emmaccode)) personal website. This website is a contained source for all of the things I create -- including art, websites, software, and even music. You may visit em's computer [here](https://ems.computer/)

@@ -42,7 +42,51 @@ function fisher_yates_shuffle(v)
     return v2
 end
 
-function build_random_post_previews(c::AbstractConnection, count::Int = 5)
+BLOG_SERIES_NAMES::Vector{Pair{String, String}} = Vector{Pair{String, String}}()
+
+function load_series()
+    posts = load_posts_by_recent(false)
+    curr = "public/content/posts/"
+    for posturi in posts
+        post = Post(curr * posturi)
+        if post.series != "" && post.series_n == 1
+            if ~(post.series in BLOG_SERIES_NAMES)
+                img = post.img
+                push!(BLOG_SERIES_NAMES, post.series => img)
+            end
+        end
+    end
+    nothing::Nothing
+end
+
+function load_post_series(series)
+    posts = load_posts_by_recent(false)
+    curr = "public/content/posts/"
+    in_series = Vector{Post}()
+    for posturi in posts
+        post = Post(curr * posturi)
+        if post.series == series
+            push!(in_series, post)
+        end
+    end
+    sort!(in_series, by = p -> p.series_n)
+    in_series::Vector{Post}
+end
+
+function make_series_preview(series_name::Pair{String, String})
+    series_label = h2(text = series_name[1])
+    safename = replace(series_name[1], " " => "_", "'" => "|_")
+    series_box = section(gen_ref(), children = Vector{Components.AbstractComponent}([series_label]), 
+        onclick = "'window.location.href = \"/blog/series?name=$(safename)\";'")
+    style!(series_box, "padding" => .5percent, "cursor" => "pointer", 
+        "border" => "2px solid black", "background-color" => "#212222")
+    if series_name[2] != ""
+        push!(series_box, img(width = 100, src = series_name[2]))
+    end
+    series_box::Component{:section}
+end
+
+function build_random_post_previews(c::AbstractConnection, count::Int = 3)
     posts = load_posts_by_recent()
     if isempty(posts)
         return []
@@ -53,7 +97,7 @@ function build_random_post_previews(c::AbstractConnection, count::Int = 5)
     [begin
         post = Post("public/content/posts/" * post_dir)
         preview = build_post_preview(post)
-        attach_redirect_action!(c, post, preview)
+        attach_redirect_action!(post, preview)
         preview
     end for post_dir in slice]
 end
@@ -67,7 +111,7 @@ blog_menubutton_class:"hover":["background-color" => "#0a0a0a", "color" => "#854
 
 blog_route = route("/blog") do c::AbstractConnection
     write!(c, blog_menubutton_class, create_styles())
-    random_previews = build_random_post_previews(c, 5)
+    random_previews = build_random_post_previews(c, 3)
     left_box = section("randombox", children = random_previews)
     style!(left_box,
         "width" => 50percent,
@@ -75,7 +119,9 @@ blog_route = route("/blog") do c::AbstractConnection
         "vertical-align" => "top",
         "padding" => 2percent
     )
-    series_placeholder = div("seriesbox", text = "Series go here")
+    
+    series_placeholder = div("seriesbox", 
+        children = [make_series_preview(sern) for sern in BLOG_SERIES_NAMES])
     style!(series_placeholder,
         "width" => 50percent,
         "display" => "inline-block",
@@ -94,7 +140,7 @@ blog_route = route("/blog") do c::AbstractConnection
         "width" => 100percent,
         "background-color" => "#1e1e1e"
     )
-    latest_previews = build_post_previews(c, 1:10)
+    latest_previews = build_post_previews(c, 1:5)
     latest_sect = section("latestsect", children = latest_previews)
     style!(latest_sect, "padding" => 2percent)
     bod = body("mainbody",
@@ -124,18 +170,31 @@ post_route = route("/blog/post") do c::AbstractConnection
     write!(c, bod)
 end
 
-latest_route = route("/blog/latest") do c::AbstractConnection
-    write!(c, blog_menubutton_class, create_styles())
-    previews = build_post_previews(c::AbstractConnection, 1:10)
-    if length(previews) == 10
-        load_more = div("loadm", text = "load more", align = "center")
-        style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
-        "font-weight" => "bold", "font-size" => 16pt)
-        on(c, load_more, "click") do cm::ComponentModifier
-
+function make_loadmore_button(c::Toolips.AbstractConnection, current_r::UnitRange{Int64})
+    load_more = div("loadm", text = "load more", align = "center")
+    style!(load_more, "color" => "white", "background-color" => "#1e1e1e", 
+    "font-weight" => "bold", "font-size" => 16pt)
+    on(c, load_more, "click") do cm::ComponentModifier
+        previews = build_post_previews(c, current_r)
+        remove!(cm, "loadm")
+        for preview in previews
+            append!(cm, "latestsect", preview)
+        end
+        if ~(length(previews) < maximum(current_r) - minimum(current_r))
+            append!(cm, "latestsect", make_loadmore_button(c, minimum(current_r) + 5:maximum(current_r) + 5))
         end
     end
+    load_more::Component{:div}
+end
+
+latest_route = route("/blog/latest") do c::AbstractConnection
+    write!(c, blog_menubutton_class, create_styles())
+    previews = Vector{AbstractComponent}(build_post_previews(c, 1:5))
     latest_sect = section("latestsect", children = previews)
+    if length(previews) == 5
+        load_more = make_loadmore_button(c, 6:10)
+        push!(previews, load_more)
+    end
     style!(latest_sect, "padding" => 2percent)
     bod = body("mainbody", children = [build_blog_bar(c, "latestmen"), latest_sect], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
@@ -143,14 +202,69 @@ end
 
 cats_route = route("/blog/categories") do c::AbstractConnection
     write!(c, blog_menubutton_class, create_styles())
-    bod = body("mainbody", children = [build_blog_bar(c, "catmen")], style = "background-color:#1a1818;color:white;padding:0%;")
+    selected_categories::Vector{String} = Vector{String}()
+    buttons = [begin
+        tag_button = button(gen_ref(), text = tag, class = "categoryb")
+        on(c, tag_button, "click") do cm::ComponentModifier
+            found = findfirst(x -> x == tag, selected_categories)
+            if isnothing(found)
+                push!(selected_categories, tag)
+                style!(cm, tag_button, "background" => "#be60d1")
+            else
+                deleteat!(selected_categories, found)
+                style!(cm, tag_button, "background" => "transparent")
+            end
+            # now update post list
+            posts = load_posts_by_category(selected_categories)
+            if length(posts) < 1
+                set_children!(cm, "catposts", [h2(text = "no matches in these categories", align = "center")])
+            else
+                set_children!(cm, "catposts", build_post_previews(posts))
+            end
+        end
+        tag_button
+    end for tag in ALL_POST_TAGS]
+    cats_main = div("catsmain", children = buttons)
+    posts_box = div("catposts", children = h2(text = "no categories selected", align = "center"))
+    wrapper = div("-", children = [cats_main, posts_box])
+    style!(wrapper, "padding" => 3percent)
+    bod = body("mainbody", children = [build_blog_bar(c, "catmen"), wrapper], style = "background-color:#1a1818;color:white;padding:0%;")
     write!(c, bod)
 end
 
 series_route = route("/blog/series") do c::AbstractConnection
     write!(c, blog_menubutton_class, create_styles())
     bod = body("mainbody", children = [build_blog_bar(c, "sermen")], style = "background-color:#1a1818;color:white;padding:0%;")
+    args = get_args(c)
+    if haskey(args, :name)
+        selected_series = replace(args[:name], "_" => " ", "|_" => "'")
+        posts = load_post_series(selected_series)
+        push!(bod, div("-", children = [begin
+            prev = build_post_preview(post)
+            attach_redirect_action!(post, prev)
+            prev
+        end for post in posts]))
+    else
+        push!(bod, div("-", children = [make_series_preview(sern) for sern in BLOG_SERIES_NAMES]))
+    end
     write!(c, bod)
+end
+
+ALL_POST_TAGS::Vector{String} = Vector{String}()
+
+function register_all_post_tags()
+    @info "registering post tags"
+    baseuri = "public/content/posts/"
+    for posturi in load_posts_by_recent(false)
+        post = Post(baseuri * posturi)
+        for tag in post.tags
+            if ~(tag in ALL_POST_TAGS)
+                push!(ALL_POST_TAGS, tag)
+                @info tag
+            end
+        end
+    end
+    @info "register complete"
 end
 
 function get_postsearch_results(query::String)
