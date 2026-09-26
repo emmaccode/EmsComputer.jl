@@ -662,15 +662,81 @@ function showhtml_interpolate(s::String)
     string(div("-", text = Toolips.Components.rep_in(s)))
 end
 
+function interpolate_post(s::String)
+    fname = replace(s, "\n" => "")
+    uri = "public/content/posts/" * fname
+    if ~(contains(uri, ".md"))
+        uri = uri * ".md"
+    end
+    if ~(isfile(uri))
+        return
+    end
+    post = Post(uri)
+    preview = build_post_preview(post)
+    attach_redirect_action!(post, preview)
+    string(preview)::String
+end
+
+function interpolate_output(s::String)
+    outer = div("-", text = s)
+    style!(
+        outer,
+        "padding" => 2percent,
+        "background-color" => "#333333",
+        "border-radius" => 3pt
+    )
+    string(outer)
+end
+function interpolate!(
+    comp::Component{:div},
+    fillfuncs::Pair{String, <:Any}...
+)
+    raw = comp[:text]
+
+    for (name, f) in fillfuncs
+        at = firstindex(raw)
+
+        while true
+            open_tag = "<code class=\"language-$name\">"
+            position = findnext(open_tag, raw, at)
+
+            isnothing(position) && break
+
+            content_start = nextind(raw, last(position))
+            close_tag = findnext("</code>", raw, content_start)
+
+            if isnothing(close_tag)
+                at = nextind(raw, last(position))
+                continue
+            end
+
+            content_end = prevind(raw, first(close_tag))
+            section = raw[content_start:content_end]
+            section = f(section)
+
+            raw = raw[1:prevind(raw, first(position))] *
+                  section *
+                  raw[first(close_tag):end]
+
+            at = nextind(raw, prevind(raw, first(position) + length(section)))
+        end
+    end
+
+    comp[:text] = raw
+    nothing
+end
+
 function build_post_body(post::Post)
     rawpost = replace(get_raw_post(post), "+" => "|[PLUS]|", "<" => "|[ARRL]|", 
-        ">" => "|[ARRR]|", "\"" => "|[QUOT]|")
+        ">" => "|[ARRR]|", "\"" => "|[QUOT]|", "'" => "|[APOS]|", "—" => "|[LDASH]|", 
+        "’" => "|[APOS2]|")
     post_main = tmd("postmain", rawpost)
     post_main[:text] = replace(post_main[:text], "|[PLUS]|" => "+", "|[ARRL]|" => "<", "|[ARRR]|" => ">", 
-        "|[QUOT]|" => "\"", "&#39;" => "\"", "&#37;" => "%")
+        "|[QUOT]|" => "\"", "&#39;" => "\"", "&#37;" => "%", "|[APOS]|" => "'", "|[LDASH]|" => "—", 
+        "|[APOS2]|" => "’")
     interpolate!(post_main, "julia" => interpolate_julia, "img" => interpolate_img, "python" => interpolate_py, 
         "c" => interpolate_C, "html" => interpolate_html, "js" => interpolate_javascript, "css" => interpolate_CSS, 
-        "showhtml" => showhtml_interpolate)
+        "showhtml" => showhtml_interpolate, "post" => interpolate_post, "output" => interpolate_output)
     post_main::Component{:div}
 end
 

@@ -59,11 +59,11 @@ MODELS_MAIN = begin
         end
         on("details-$model_name", details_button, "click")
         model_div = div("-", children = [name_indicator, td_frame, download_glb, download_blender, details_button])
-        style!(model_div, "border" => "2px solid #1e1e1e", "border-radius" => 5px, "display" => "block")
+        style!(model_div, "border" => "2px solid #1e1e1e", "border-radius" => 5px, "display" => "inline-block")
         model_div
     end for model_meta in readdir("public/media/models/meta")]
-    showcase_container = div("showcase", children = [showcase_heading, model_previews ...], align = "left")
-    style!(showcase_container, "border-radius" => 4pt, "padding" => 3percent, "background-color" => "#1f1d29", "display" => "grid")
+    showcase_container = div("showcase", children = [showcase_heading, model_previews ...], align = "center")
+    style!(showcase_container, "border-radius" => 4pt, "padding" => 3percent, "background-color" => "#1f1d29", "display" => "inline-block")
     non_showcase_dirs = readdir("public/media/models/not_showcase")
     non_showcase = Vector{AbstractComponent}()
     for model_name in non_showcase_dirs

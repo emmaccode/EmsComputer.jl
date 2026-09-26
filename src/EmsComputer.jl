@@ -16,7 +16,10 @@ ROUTES::Vector{Toolips.Route} = Vector{Toolips.Route}()
 JL_highlighter = OliveHighlighters.Highlighter()
 
 OliveHighlighters.style_julia!(JL_highlighter)
-style!(JL_highlighter, :op, ["color" => "white"])
+style!(JL_highlighter, :op, ["color" => "#6b4f82"])
+style!(JL_highlighter, :default, ["color" => "#bdbcb5"])
+style!(JL_highlighter, :params, ["color" => "#bc6bff"])
+
 function start(ip::IP4)
     start!(EmsComputer, ip, pman_type = ParametricScheduler.Scheduler)
 end
