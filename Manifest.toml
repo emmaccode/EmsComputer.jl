@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "c9eaa9b38c5f54b062345d896b637d0f713c0e3d"
+project_hash = "8114ce4730092eedd1e48e4ca5df808a434f1ddc"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -74,7 +74,7 @@ uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 version = "1.7.0"
 
 [[deps.EmsComputer]]
-deps = ["IPyCells", "JSON", "Revise", "TOML", "Toolips", "ToolipsSession"]
+deps = ["IPyCells", "JSON", "OliveHighlighters", "Revise", "TOML", "Toolips", "ToolipsSession"]
 path = "."
 uuid = "9986d9ca-eca8-4df6-b584-a6ff1cefdb98"
 version = "0.1.0"
@@ -231,6 +231,12 @@ git-tree-sha1 = "5c91b589c9068684360344796b4fa18ea7025862"
 uuid = "9ce9415f-ecd2-4b63-a3f6-984ce63e76ce"
 version = "0.1.3"
 
+[[deps.ParametricScheduler]]
+deps = ["Dates", "ParametricProcesses", "Pkg"]
+git-tree-sha1 = "f46b0e8c0cca6cab2af2801872d80ae42ec722b0"
+uuid = "f31cb20c-9fb3-42aa-992b-75cb21ef0e24"
+version = "0.1.0"
+
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
 git-tree-sha1 = "3de8f5e6e90ebfa8d6d1f86997d6cdcd6a912ff3"
@@ -334,8 +340,6 @@ version = "0.2.11"
 [[deps.ToolipsSession]]
 deps = ["Dates", "Toolips"]
 git-tree-sha1 = "a4a48f0cb9cdc9e41028fd4ea8f4af74ab250b53"
-repo-rev = "Unstable"
-repo-url = "https://github.com/ChifiSource/ToolipsSession.jl"
 uuid = "2fe55384-55bc-4df3-9d59-c817d405cd05"
 version = "0.5.3"
 
